@@ -1,0 +1,51 @@
+User {
+id
+firstName,
+lastname,
+email,
+password,
+phoneNumber,
+address: {
+state,
+city,
+zip,
+line1,
+line2
+},
+isActive,
+createdAt,
+UpdatedAt,
+DeletedAt,
+}
+ 
+Distributorship {
+id
+name,
+userId,
+isActive,
+createdAt,
+UpdatedAt,
+DeletedAt,
+}
+ 
+products {
+id
+productName,
+productCode,
+productCategory,
+productMRP,
+productRate,
+AvailableStocks,
+distributorshipId,
+userId,
+isActive,
+createdby,
+createdAt,
+UpdatedAt,
+DeletedAt,
+}
+ 
+ 
+invoices {
+ 
+}

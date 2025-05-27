@@ -1,0 +1,6 @@
+@ELogistics_HostAddress = http://localhost:5222
+
+GET {{ELogistics_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
