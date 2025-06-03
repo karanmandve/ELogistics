@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using infrastructure;
 
@@ -11,9 +12,11 @@ using infrastructure;
 namespace infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250603093740_initial migration")]
+    partial class initialmigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,63 +47,7 @@ namespace infrastructure.Migrations
                     b.ToTable("Otps");
                 });
 
-            modelBuilder.Entity("domain.Model.Products.Product", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AvailableStocks")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ProductCategory")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ProductCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ProductImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("ProductMRP")
-                        .HasColumnType("decimal(11,2)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<decimal>("ProductRate")
-                        .HasColumnType("decimal(11,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("domain.Model.States.State", b =>
+            modelBuilder.Entity("domain.Model.State.State", b =>
                 {
                     b.Property<int>("StateId")
                         .ValueGeneratedOnAdd()
@@ -116,7 +63,7 @@ namespace infrastructure.Migrations
                     b.ToTable("States");
                 });
 
-            modelBuilder.Entity("domain.Model.Users.User", b =>
+            modelBuilder.Entity("domain.Model.User.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -187,7 +134,7 @@ namespace infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("domain.Model.Users.UserType", b =>
+            modelBuilder.Entity("domain.Model.User.UserType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -204,26 +151,15 @@ namespace infrastructure.Migrations
                     b.ToTable("UserTypes");
                 });
 
-            modelBuilder.Entity("domain.Model.Products.Product", b =>
+            modelBuilder.Entity("domain.Model.User.User", b =>
                 {
-                    b.HasOne("domain.Model.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("domain.Model.Users.User", b =>
-                {
-                    b.HasOne("domain.Model.States.State", "State")
+                    b.HasOne("domain.Model.State.State", "State")
                         .WithMany()
                         .HasForeignKey("StateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("domain.Model.Users.UserType", "UserType")
+                    b.HasOne("domain.Model.User.UserType", "UserType")
                         .WithMany()
                         .HasForeignKey("UserTypeId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -11,7 +11,5 @@ namespace core.Interface
            where TEntity : class;
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-
-        IDbConnection GetConnection();
     }
 }

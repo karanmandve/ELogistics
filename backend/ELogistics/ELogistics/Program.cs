@@ -41,8 +41,6 @@ internal class Program
 
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(configuration);
-        builder.Services.AddTransient<IRazorpayService>(provider =>
-        new RazorpayService(configuration["Razorpay:KeyId"], configuration["Razorpay:KeySecret"]));
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

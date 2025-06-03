@@ -1,15 +1,15 @@
-﻿
-using core.API_Response;
-using core.Interface;
-using Dapper;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+﻿/*
+// using core.API_Response;
+// using core.Interface;
+// using Dapper;
+// using MediatR;
+// using Microsoft.EntityFrameworkCore;
+// using System;
+// using System.Collections.Generic;
+// using System.Linq;
+// using System.Text;
+// using System.Threading.Tasks;
+// using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace App.Core.Apps.State.Query
 {
@@ -31,7 +31,7 @@ namespace App.Core.Apps.State.Query
         {
             var connection = _appDbContext.GetConnection();
             var query = "SELECT * FROM States";
-            var allState = await connection.QueryAsync<domain.Model.CountryState.State>(query);
+            var allState = await connection.QueryAsync<domain.Model.State.State>(query);
 
             return AppResponse.Success<object>(allState.ToList(), "Successfully Fetch All State", HttpStatusCodes.OK);
         }
@@ -42,4 +42,6 @@ namespace App.Core.Apps.State.Query
 
 
 
+
 }
+*/

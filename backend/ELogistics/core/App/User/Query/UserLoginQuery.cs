@@ -1,5 +1,7 @@
 ﻿using core.API_Response;
 using core.Interface;
+using domain.Model.Users;
+using domain.ModelDtos;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -8,74 +10,83 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-public class UserLoginQuery : IRequest<AppResponse<object>>
+namespace core.App.User.Query
 {
-    public domain.ModelDto.LoginDto LoginUser { get; set; }
-}
-
-public class UserLoginQueryHandler : IRequestHandler<UserLoginQuery, AppResponse<object>>
-{
-    private readonly IAppDbContext _context;
-    private readonly IConfiguration _configuration;
-    private readonly IEmailService _emailService; // Add email service
-
-    public UserLoginQueryHandler(IAppDbContext context, IConfiguration configuration, IEmailService emailService)
+    public class UserLoginQuery : IRequest<AppResponse<object>>
     {
-        _context = context;
-        _configuration = configuration;
-        _emailService = emailService;
+        public LoginDto LoginUser { get; set; }
     }
 
-    public async Task<AppResponse<object>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
+    public class UserLoginQueryHandler : IRequestHandler<UserLoginQuery, AppResponse<object>>
     {
-        var user = request.LoginUser;
+        private readonly IAppDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        var userExist = await _context.Set<domain.Model.User.User>().FirstOrDefaultAsync(x => x.Username == user.Username);
-
-        if (userExist == null || !BCrypt.Net.BCrypt.Verify(user.Password, userExist.Password) || userExist.IsDeleted)
+        public UserLoginQueryHandler(IAppDbContext context, IConfiguration configuration)
         {
-            return AppResponse.Fail<object>(message: "Email or Password Invalid", statusCode: HttpStatusCodes.Unauthorized);
+            _context = context;
+            _configuration = configuration;
         }
 
-        var otp = await _context.Set<domain.Model.Otp.Otp>().FirstOrDefaultAsync(x => x.Username == user.Username && x.Code == user.Otp);
-
-        if (otp == null || otp.Expiration < DateTime.Now)
+        public async Task<AppResponse<object>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
         {
-            return AppResponse.Fail<object>(message: "Invalid Otp", statusCode: HttpStatusCodes.Unauthorized);
-        }
+            var user = request.LoginUser;
 
-        var userType = await _context.Set<domain.Model.User.UserType>().FirstOrDefaultAsync(x => x.Id == userExist.UserTypeId);
+            var userExist = await _context.Set<domain.Model.Users.User>()
+                .FirstOrDefaultAsync(x => x.Email == user.Email, cancellationToken);
 
-        var claim = new[]
-         {
-                new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+            if (userExist == null || !BCrypt.Net.BCrypt.Verify(user.Password, userExist.Password) || !userExist.IsActive)
+            {
+                return AppResponse.Fail<object>(message: "Email or Password Invalid", statusCode: HttpStatusCodes.Unauthorized);
+            }
+
+            var otp = await _context.Set<domain.Model.Otp.Otp>()
+                        .Where(x => x.Email == user.Email && x.Code == user.Otp)
+                        .OrderByDescending(x => x.Expiration)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+            if (otp == null || otp.Expiration < DateTime.Now)
+            {
+                return AppResponse.Fail<object>(message: "Invalid Otp", statusCode: HttpStatusCodes.Unauthorized);
+            }
+
+            var userType = await _context.Set<UserType>().FirstOrDefaultAsync(x => x.Id == userExist.UserTypeId);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"] ?? string.Empty),
                 new Claim("Id", userExist.Id.ToString()),
                 new Claim("Email", userExist.Email),
-                new Claim(ClaimTypes.Role, userType.UserTypeName)
+                new Claim(ClaimTypes.Role, userType.Name ?? string.Empty),
             };
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(
-            _configuration["Jwt:Issuer"],
-            _configuration["Jwt:Audience"],
-            claim,
-            expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: signIn);
-        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        var allOtps = await _context.Set<domain.Model.Otp.Otp>().Where(x => x.Username == user.Username).ToListAsync();
-        _context.Set<domain.Model.Otp.Otp>().RemoveRange(allOtps);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? string.Empty));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        await _context.SaveChangesAsync();
+            var token = new JwtSecurityToken(
+                _configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: signIn);
 
-        var data = new
-        {
-            Token = jwt,
-            Expiration = token.ValidTo,
-        };
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
+            var allOtps = await _context.Set<domain.Model.Otp.Otp>()
+                .Where(x => x.Email == user.Email)
+                .ToListAsync(cancellationToken);
 
-        return AppResponse.Success<object>(data, message: "Login Successful", statusCode: HttpStatusCodes.OK);
+            _context.Set<domain.Model.Otp.Otp>().RemoveRange(allOtps);
 
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var data = new
+            {
+                Token = jwt,
+                Expiration = token.ValidTo,
+            };
+
+            return AppResponse.Success<object>(data, message: "Login Successful", statusCode: HttpStatusCodes.OK);
+        }
     }
 }
