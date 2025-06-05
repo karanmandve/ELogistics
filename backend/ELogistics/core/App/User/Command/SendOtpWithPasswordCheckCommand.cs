@@ -16,9 +16,9 @@ namespace core.App.User.Command
     public class SendOtpWithPasswordCheckCommandHandler : IRequestHandler<SendOtpWithPasswordCheckCommand, AppResponse<object>>
     {
         private readonly IAppDbContext _context;
-        private readonly IEmailService _emailService; // Add email service
+        private readonly IEmailService _emailService;
 
-        public SendOtpWithPasswordCheckCommandHandler(IAppDbContext context, IConfiguration configuration, IEmailService emailService)
+        public SendOtpWithPasswordCheckCommandHandler(IAppDbContext context, IEmailService emailService)
         {
             _context = context;
             _emailService = emailService;
@@ -29,16 +29,33 @@ namespace core.App.User.Command
             var email = request.SendOtpWithPasswordCheck.Email;
             var password = request.SendOtpWithPasswordCheck.Password;
 
-            var existingUser = await _context.Set<domain.Model.Users.User>().FirstOrDefaultAsync(x => x.Email == email);
+            // Try Distributor first
+            var distributor = await _context.Set<domain.Model.Users.Distributor>()
+                .FirstOrDefaultAsync(x => x.Email == email);
 
-            if (existingUser == null || !BCrypt.Net.BCrypt.Verify(password, existingUser.Password))
+            // Try Customer if distributor not found
+            var customer = distributor == null ? 
+                await _context.Set<domain.Model.Users.Customer>()
+                    .FirstOrDefaultAsync(x => x.Email == email) : null;
+
+            // Check if either user exists and password matches
+            if ((distributor == null && customer == null) || 
+                (distributor != null && !BCrypt.Net.BCrypt.Verify(password, distributor.Password)) ||
+                (customer != null && !BCrypt.Net.BCrypt.Verify(password, customer.Password)))
             {
-                return AppResponse.Fail<object>(message: "User Not Exist", statusCode: HttpStatusCodes.NotFound);
+                return AppResponse.Fail<object>(message: "Invalid Email or Password", statusCode: HttpStatusCodes.NotFound);
             }
 
+            dynamic user = distributor != null ? distributor : customer;
+            
             var otp = new Random().Next(100000, 999999).ToString();
 
-            await _context.Set<Otp>().AddAsync(new domain.Model.Otp.Otp { Email = existingUser.Email, Code = otp, Expiration = DateTime.Now.AddMinutes(5) });
+            await _context.Set<Otp>().AddAsync(new domain.Model.Otp.Otp 
+            { 
+                Email = user.Email, 
+                Code = otp, 
+                Expiration = DateTime.Now.AddMinutes(5) 
+            });
             await _context.SaveChangesAsync();
 
             var textInfo = System.Globalization.CultureInfo.CurrentCulture.TextInfo;
@@ -54,7 +71,7 @@ namespace core.App.User.Command
                                   <tr>
                                     <td style='background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);'>
                                       <p style='font-size: 18px; color: #0056b3; margin-bottom: 20px;'>
-                                        Dear {textInfo.ToTitleCase(existingUser.FirstName)} {textInfo.ToTitleCase(existingUser.LastName)},
+                                        Dear {textInfo.ToTitleCase(user.FirstName)} {textInfo.ToTitleCase(user.LastName)},
                                       </p>
                                       <p style='font-size: 16px; color: #333333; margin-bottom: 20px;'>
                                         Thank you for using our service. Your one-time passcode (OTP) is:
@@ -83,14 +100,12 @@ namespace core.App.User.Command
                             </html>";
 
             await _emailService.SendEmailAsync(
-                existingUser.Email,
-                "Your OTP for EHRApplication",
+                user.Email,
+                "Your OTP for ELogistics",
                 emailBody
             );
 
             return AppResponse.Success<object>(message: "OTP sent to your email", statusCode: HttpStatusCodes.OK);
         }
     }
-
-
 }

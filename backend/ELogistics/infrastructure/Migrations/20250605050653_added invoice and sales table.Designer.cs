@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using infrastructure;
 
@@ -11,9 +12,11 @@ using infrastructure;
 namespace infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250605050653_added invoice and sales table")]
+    partial class addedinvoiceandsalestable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,7 +198,7 @@ namespace infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(11,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 

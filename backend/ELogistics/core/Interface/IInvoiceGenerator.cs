@@ -1,14 +1,10 @@
-﻿//using domain.Model.Cart;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using domain.Model.Sales;
+using domain.Model.Users;
 
-//namespace core.Interface
-//{
-//    public interface IInvoiceGenerator
-//    {
-//        Task<MemoryStream> GenerateInvoice(int salesMasterId, float totalAmount, List<CartDetail> cartDetails);
-//    }
-//}
+namespace core.Interface
+{
+   public interface IInvoiceGenerator
+   {
+       Task<MemoryStream> GenerateInvoice(Guid invoiceId, List<SalesDetail> salesDetail, Customer customerData, Distributor distributorData);
+   }
+}

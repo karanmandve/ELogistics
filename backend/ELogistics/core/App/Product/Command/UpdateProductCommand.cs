@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Mapster;
 
 namespace core.App.Product.Command
 {
@@ -33,14 +34,12 @@ namespace core.App.Product.Command
 
         public async Task<AppResponse<object>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
-            var idProperty = request.Product.GetType().GetProperty("Id");
+            var productId = request.Product.Id;
 
-            if (idProperty == null)
+            if (productId == null)
                 return AppResponse.Fail<object>(message: "Product Id is required", statusCode: HttpStatusCodes.BadRequest);
-                
-            var id = (int)idProperty.GetValue(request.Product);
 
-            var product = await _context.Set<domain.Model.Products.Product>().FindAsync(id);
+            var product = await _context.Set<domain.Model.Products.Product>().FindAsync(productId);
             if (product == null)
             {
                 return AppResponse.Fail<object>(message: "Product Not Found", statusCode: HttpStatusCodes.NotFound);
@@ -66,13 +65,9 @@ namespace core.App.Product.Command
 
                 imageUrl = blobClient.Uri.ToString();
             }
+            
+            product = request.Product.Adapt(product);
 
-            product.UserId = request.Product.UserId;
-            product.ProductName = request.Product.ProductName;
-            product.ProductCategory = request.Product.ProductCategory;
-            product.ProductMRP = request.Product.ProductMRP;
-            product.ProductRate = request.Product.ProductRate;
-            product.AvailableStocks = request.Product.AvailableStocks;
             if (!string.IsNullOrEmpty(imageUrl))
             {
                 product.ProductImageUrl = imageUrl;

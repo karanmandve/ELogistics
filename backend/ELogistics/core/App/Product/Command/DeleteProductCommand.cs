@@ -9,7 +9,7 @@ namespace core.App.Product.Command
 {
     public class DeleteProductCommand : IRequest<AppResponse<object>>
     {
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
     }
 
     public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, AppResponse<object>>

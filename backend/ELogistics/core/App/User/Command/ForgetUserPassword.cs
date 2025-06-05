@@ -35,11 +35,11 @@ namespace core.App.User.Command
             var username = request.Username;
             var requestOtp = request.Otp;
 
-            var existingUser = await _context.Set<domain.Model.User.User>().FirstOrDefaultAsync(x => x.Username == username);
+            var existingCustomer = await _context.Set<domain.Model.Users.Customer>().FirstOrDefaultAsync(x => x.Username == username);
 
             var otp = await _context.Set<domain.Model.Otp.Otp>().FirstOrDefaultAsync(x => x.Username == username && x.Code == requestOtp && x.Expiration > DateTime.Now);
 
-            if (existingUser == null || otp == null)
+            if (existingCustomer == null || otp == null)
             {
                 return AppResponse.Fail<object>(message: "Invalid OTP", statusCode: HttpStatusCodes.Unauthorized);
             }
@@ -49,7 +49,7 @@ namespace core.App.User.Command
             string password = passwordGenerator.Next();
             password = password.Replace("\\", "*");
 
-            existingUser.Password = BCrypt.Net.BCrypt.HashPassword(password);
+            existingCustomer.Password = BCrypt.Net.BCrypt.HashPassword(password);
 
             await _context.SaveChangesAsync();
 
@@ -64,7 +64,7 @@ namespace core.App.User.Command
                                                       </tr>
                                                       <tr>
                                                         <td style='background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);'>
-                                                          <p style='font-size: 18px; color: #0077b6;'>Dear {existingUser.FirstName},</p>
+                                                          <p style='font-size: 18px; color: #0077b6;'>Dear {existingCustomer.FirstName},</p>
                                                           <p style='font-size: 16px; color: #333;'>We have received your request to reset your password. Your new password has been successfully generated.</p>
                                                           <p style='font-size: 16px; color: #333;'><strong>Your new password:</strong> <span style='color: #0077b6;'>{password}</span></p>
                                                           <p style='font-size: 16px; color: #333;'>Please log in to your account and change this password as soon as possible for security purposes.</p>
@@ -82,7 +82,7 @@ namespace core.App.User.Command
                                                 </html>";
 
 
-            await _emailService.SendEmailAsync(existingUser.Email,
+            await _emailService.SendEmailAsync(existingCustomer.Email,
                 "Password Reset Successful",
                 emailBody
             );

@@ -33,14 +33,14 @@ namespace core.App.User.Command
             var username = request.ChangePasswordData.Username;
             var newPassword = request.ChangePasswordData.NewPassword;
 
-            var existingUser = await _context.Set<domain.Model.User.User>().FirstOrDefaultAsync(user => user.Username == username);
+            var existingCustomer = await _context.Set<domain.Model.Users.Customer>().FirstOrDefaultAsync(user => user.Username == username);
 
-            if (existingUser == null)
+            if (existingCustomer == null)
             {
                 return AppResponse.Fail<object>(message: "User Not Found", statusCode: HttpStatusCodes.NotFound);
             }
 
-            existingUser.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            existingCustomer.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
 
             await _context.SaveChangesAsync();
 

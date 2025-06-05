@@ -1,5 +1,3 @@
-
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using domain.Model.Users;
@@ -9,12 +7,13 @@ namespace domain.Model.Products
     public class Product
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
-        [ForeignKey("User")]
+        [ForeignKey("Distributor")]
         [Required]
-        public Guid UserId { get; set; }
-        public User User { get; set; }
+        public Guid DistributorId { get; set; }
+        public Distributor Distributor { get; set; }
+        
         public string ProductImageUrl { get; set; }
 
         [Required, MaxLength(200)]

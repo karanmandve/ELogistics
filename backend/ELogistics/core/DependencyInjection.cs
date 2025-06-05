@@ -1,5 +1,6 @@
 ﻿using core.Interface;
 using core.Service;
+using core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace core
         {
             services.AddScoped<IEmailService, EmailService>();
             //services.AddScoped<IRazorpayService, RazorpayService>();
-            //services.AddScoped<IInvoiceGenerator, InvoiceGenerator>();
+            services.AddScoped<IInvoiceGenerator, InvoiceGenerator>();
 
             services.AddMediatR(config =>
             {

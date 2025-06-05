@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using domain.Model.States;
 
 namespace domain.Model.Users
 {
-    public class User
+    public class Distributor
     {
         [Key]
         public Guid Id { get; set; }
@@ -44,6 +44,9 @@ namespace domain.Model.Users
         [MaxLength(200)]
         public string? Line2 { get; set; }
 
+        [MaxLength(20)]
+        public string? GSTNumber { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         [Required]
@@ -53,4 +56,4 @@ namespace domain.Model.Users
 
         public DateTime? DeletedAt { get; set; }
     }
-}
+} 

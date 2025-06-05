@@ -32,18 +32,34 @@ namespace core.App.User.Command
         {
             var registerUser = request.RegisterUserData;
 
-            var userAlreadyExist = await _context.Set<domain.Model.Users.User>().FirstOrDefaultAsync(us => us.Email == registerUser.Email);
-
-            if (userAlreadyExist != null)
+            if (registerUser.UserTypeId == 1)
             {
-                return AppResponse.Fail<object>(message: "User Already Exist", statusCode: HttpStatusCodes.Conflict);
+                var distributorExists = await _context.Set<domain.Model.Users.Distributor>().FirstOrDefaultAsync(us => us.Email == registerUser.Email);
+                if (distributorExists != null)
+                {
+                    return AppResponse.Fail<object>(message: "Distributor Already Exist", statusCode: HttpStatusCodes.Conflict);
+                }
+                var distributor = registerUser.Adapt<domain.Model.Users.Distributor>();
+                distributor.Password = BCrypt.Net.BCrypt.HashPassword(registerUser.Password);
+                await _context.Set<domain.Model.Users.Distributor>().AddAsync(distributor);
+                await _context.SaveChangesAsync(cancellationToken);
             }
-
-            var user = registerUser.Adapt<domain.Model.Users.User>();
-            user.Password = BCrypt.Net.BCrypt.HashPassword(registerUser.Password);
-
-            await _context.Set<domain.Model.Users.User>().AddAsync(user);
-            await _context.SaveChangesAsync(cancellationToken);
+            else if (registerUser.UserTypeId == 2)
+            {
+                var customerExists = await _context.Set<domain.Model.Users.Customer>().FirstOrDefaultAsync(us => us.Email == registerUser.Email);
+                if (customerExists != null)
+                {
+                    return AppResponse.Fail<object>(message: "Customer Already Exist", statusCode: HttpStatusCodes.Conflict);
+                }
+                var customer = registerUser.Adapt<domain.Model.Users.Customer>();
+                customer.Password = BCrypt.Net.BCrypt.HashPassword(registerUser.Password);
+                await _context.Set<domain.Model.Users.Customer>().AddAsync(customer);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                return AppResponse.Fail<object>(message: "Invalid UserTypeId", statusCode: HttpStatusCodes.BadRequest);
+            }
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
             var emailBody = $@"
@@ -64,7 +80,7 @@ namespace core.App.User.Command
                                         Welcome to <strong>ELogistics</strong>! Your account has been successfully created.
                                     </p>
                                     <p style=""font-size: 16px; color: #333333; line-height: 1.5; margin-bottom: 20px;"">
-                                        We’re thrilled to have you on board and look forward to streamlining your shipping and logistics operations.
+                                        We're thrilled to have you on board and look forward to streamlining your shipping and logistics operations.
                                     </p>
                                     <p style=""font-size: 16px; color: #333333; line-height: 1.5; margin-bottom: 30px;"">
                                         If you have any questions, just reply to this email or reach out to our support team.

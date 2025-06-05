@@ -13,6 +13,8 @@ namespace domain.ModelDtos
 
         public int UserTypeId { get; set; }
 
+        public Guid? DistributorId { get; set; }
+
         public string Email { get; set; }
 
         public string Password { get; set; }

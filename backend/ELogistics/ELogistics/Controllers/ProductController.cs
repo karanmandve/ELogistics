@@ -3,6 +3,7 @@ using domain.ModelDtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using core.API_Response;
+using core.App.Product.Query;
 
 namespace EComApplication.Controllers
 {
@@ -47,7 +48,7 @@ namespace EComApplication.Controllers
         }
 
         [HttpDelete("delete-product/{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(Guid id)
         {
             var result = await _mediator.Send(new DeleteProductCommand { ProductId = id });
             if (!result.IsSuccess)
@@ -87,7 +88,7 @@ namespace EComApplication.Controllers
                 };
 
                 var result = await _mediator.Send(command);
-                if (!result.IsSuccess && result.StatusCode == (int)HttpStatusCodes.NotFound)
+                if (!result.IsSuccess)
                 {
                     return NotFound(result);
                 }
@@ -95,22 +96,18 @@ namespace EComApplication.Controllers
             }
         }
 
-        //         [HttpGet("get-product-by-user-id/{userId}")]
-        //         public async Task<IActionResult> GetProductByUserId(int userId)
-        //         {
-        //             var result = await _mediator.Send(new GetAllProductByUserIdQuery { UserId = userId });
+        [HttpGet("get-product-by-distributor/{distributorId}")]
+        public async Task<IActionResult> GetProductByDistributorId(Guid distributorId)
+        {
+            var result = await _mediator.Send(new GetAllProductByDistributorIdQuery { DistributorId = distributorId });
 
-        //             if (result == null)
-        //             {
-        //                 return NotFound(new
-        //                 {
-        //                     statusCode = 404,
-        //                     message = "Product not found"
-        //                 });
-        //             }
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
 
-        //             return Ok(result);
-        //         }
+            return Ok(result);
+        }
 
         //         [HttpGet("get-all-product")]
         //         public async Task<IActionResult> GetAllProduct()

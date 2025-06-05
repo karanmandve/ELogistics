@@ -36,9 +36,9 @@ namespace core.App.User.Command
         {
             var username = request.Username;
 
-            var existingUser = await _context.Set<domain.Model.User.User>().FirstOrDefaultAsync(x => x.Username == username);
+            var existingCustomer = await _context.Set<domain.Model.Users.Customer>().FirstOrDefaultAsync(x => x.Username == username);
 
-            if (existingUser == null)
+            if (existingCustomer == null)
             {
                 return AppResponse.Fail<object>(message: "User Not Exist", statusCode: HttpStatusCodes.NotFound);
             }
@@ -46,7 +46,7 @@ namespace core.App.User.Command
 
             var otp = new Random().Next(100000, 999999).ToString();
 
-            await _context.Set<Otp>().AddAsync(new domain.Model.Otp.Otp { Username = existingUser.Username, Code = otp, Expiration = DateTime.Now.AddMinutes(5) });
+            await _context.Set<Otp>().AddAsync(new domain.Model.Otp.Otp { Username = existingCustomer.Username, Code = otp, Expiration = DateTime.Now.AddMinutes(5) });
             await _context.SaveChangesAsync();
 
 
@@ -61,7 +61,7 @@ namespace core.App.User.Command
                                       </tr>
                                       <tr>
                                         <td style='background-color: white; padding: 40px; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);'>
-                                          <p style='font-size: 18px; color: #0077b6; margin-bottom: 20px;'>Dear {existingUser.FirstName},</p>
+                                          <p style='font-size: 18px; color: #0077b6; margin-bottom: 20px;'>Dear {existingCustomer.FirstName},</p>
                                           <p style='font-size: 16px; color: #333; margin-bottom: 20px;'>Thank you for using our service. Your OTP is:</p>
                                           <p style='font-size: 24px; color: #333; font-weight: bold; margin: 20px 0; padding: 10px; border-radius: 5px; background-color: #e1f5fe; display: inline-block;'>{otp}</p>
                                           <p style='font-size: 16px; color: #333; margin-top: 20px;'>Please use this OTP within the next 5 minutes. If you did not request this, please ignore this email.</p>
@@ -79,7 +79,7 @@ namespace core.App.User.Command
 
 
             await _emailService.SendEmailAsync(
-                existingUser.Email,
+                existingCustomer.Email,
                 "Your OTP for EHRApplication",
                 emailBody
             );
