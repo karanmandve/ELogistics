@@ -1,0 +1,66 @@
+/* Styling for the Card */
+.card {
+    background-color: #ffffff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 10px;
+  }
+  
+  .card-body {
+    background-color: #F1F3F6; /* Light background color */
+  }
+  
+  .card-title {
+    color: #333333;
+  }
+  
+  .card-text {
+    color: #555555;
+  }
+  
+  .card-text strong {
+    color: #333333;
+  }
+  
+  /* Styling for Profile Image */
+  img {
+    max-width: 150px; /* Ensure image is not too large */
+    height: auto;
+    border-radius: 50%; /* Round profile image */
+  }
+  
+  /* Styling for SOAP notes form */
+  textarea {
+    resize: none; /* Prevent textarea resizing */
+  }
+  
+  button {
+    background-color: #007bff;
+    border: none;
+    padding: 10px 20px;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3; /* Darker blue for hover effect */
+  }
+  
+  .text-danger {
+    font-size: 0.9rem;
+  }
+  
+  /* Align form fields properly */
+  .row.g-3 .col-md-6 {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .row.g-3 .col-md-6 label {
+    font-weight: bold;
+  }
+  
+  .row.g-3 .col-md-6 textarea {
+    margin-top: 8px;
+  }
+  

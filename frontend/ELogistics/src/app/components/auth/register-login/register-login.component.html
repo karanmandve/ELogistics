@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+
+
+<div class="container loginRegister">
+  <div class="card shadow-sm rounded" [ngStyle]="{'background-color': '#ffffff', 'max-width': activeForm === 'login' ? '500px' : '700px'}">
+    <div class="card-body">
+      <div class="text-center mb-4">
+        <button
+          class="btn btn-outline-primary me-2"
+          (click)="setActiveForm('login')"
+          [ngClass]="{ active: activeForm === 'login' }"
+        >
+          Login
+        </button>
+        <button
+          class="btn btn-outline-primary me-2"
+          (click)="setActiveForm('customerRegister')"
+          [ngClass]="{ active: activeForm === 'customerRegister' }"
+        >
+          Customer Register
+        </button>
+
+        <button
+        class="btn btn-outline-primary"
+        (click)="setActiveForm('distributorRegister')"
+        [ngClass]="{ active: activeForm === 'distributorRegister' }"
+      >
+        Distributor Register
+      </button>
+
+      </div>
+
+      <div *ngIf="activeForm === 'login'">
+        <app-login></app-login>
+      </div>
+      <div *ngIf="activeForm === 'customerRegister'">
+        <app-customer-registration></app-customer-registration>
+      </div>
+      <div *ngIf="activeForm === 'distributorRegister'">
+        <app-distributor-registration></app-distributor-registration>
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+

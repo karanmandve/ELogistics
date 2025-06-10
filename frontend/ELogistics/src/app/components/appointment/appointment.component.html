@@ -1,0 +1,331 @@
+<div class="container mt-5 shadow-sm p-4 rounded appointment-container" style="background-color: #ffffff; max-width: 700px;">
+    <h2 class="text-center mb-4 fw-bold app-heading">Book Appointment</h2>
+  
+    @if (userDetails.userTypeId == 2) {
+    <form [formGroup]="customerAppointmentForm" (ngSubmit)="onPay()">
+      <div class="row mb-4">
+        <!-- Speciality Dropdown -->
+        <div class="col-md-6">
+          <label for="specialisation" class="form-label fw-semibold">Speciality</label>
+          <select
+            id="specialisation"
+            class="form-select"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="specialisation"
+            (change)="onChange(customerAppointmentForm.get('specialisation')?.value)"
+          >
+            <option value="" disabled>Select Speciality</option>
+            <option *ngFor="let specialisation of allSpecialisations" [value]="specialisation.id">
+              {{ specialisation.specialisationName }}
+            </option>
+          </select>
+          <div
+            *ngIf="customerAppointmentForm.get('specialisation')?.touched && customerAppointmentForm.get('specialisation')?.invalid"
+            class="text-danger mt-1"
+          >
+            Specialisation is required.
+          </div>
+        </div>
+  
+        <!-- Distributor Dropdown -->
+        <div class="col-md-6">
+          <label for="distributor" class="form-label fw-semibold">Distributor</label>
+          <select
+            id="distributor"
+            class="form-select"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="distributor"
+            (change)="onChangeDistributor(customerAppointmentForm.get('distributor')?.value)"
+          >
+            <option value="" disabled>Select Distributor</option>
+            <option *ngFor="let distributor of allDistributors" [value]="distributor.id">
+              {{ distributor.firstName }} {{ distributor.lastName }} ₹{{ distributor.visitingCharge}}
+            </option>
+          </select>
+          <div
+            *ngIf="customerAppointmentForm.get('distributor')?.touched && customerAppointmentForm.get('distributor')?.invalid"
+            class="text-danger mt-1"
+          >
+            Distributor is required.
+          </div>
+        </div>
+      </div>
+  
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label for="date" class="form-label fw-semibold">Date</label>
+          <input
+            type="date"
+            id="date"
+            [min]="todayDate"
+            [max]="maxDate"
+            class="form-control"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="date"
+            (input)="onChangeDate()"
+          />
+          <div
+            *ngIf="customerAppointmentForm.get('date')?.touched && customerAppointmentForm.get('date')?.invalid"
+            class="text-danger mt-1"
+          >
+            Please select a valid date.
+          </div>
+        </div>
+        
+        <!-- Time Picker -->
+        <div class="col-md-6">
+          <label for="time" class="form-label fw-semibold">Time</label>
+          <input
+            type="time"
+            id="time"
+            [min]="minTime" 
+            [max]="'20:00'"
+            class="form-control"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="time"
+            (input)="onChangeTime($event)"
+          />
+          <div
+            style="font-size: 13px"
+            *ngIf="customerAppointmentForm.controls['time'].touched || customerAppointmentForm.controls['time'].dirty"
+          >
+            <div *ngIf="customerAppointmentForm.controls['time'].hasError('required')">
+              <div class="text-danger">*Time is required</div>
+            </div>
+            <div *ngIf="!isTimeValid && customerAppointmentForm.controls['time'].touched">
+              <div class="text-danger">*Time must be at least 1 hour later than the current time</div>
+            </div>
+            <div *ngIf="!isTimeInRange && customerAppointmentForm.controls['time'].touched">
+              <div class="text-danger">*Time must be between 08:00 and 20:00</div>
+            </div>
+          </div>
+        </div>
+
+
+
+      </div>
+  
+      <!-- Chief Complaint -->
+      <div class="mb-4">
+        <label for="chiefComplaint" class="form-label fw-semibold">Chief Complaint</label>
+        <textarea
+          id="chiefComplaint"
+          class="form-control"
+          minlength="10"
+          maxlength="200"
+          rows="3"
+          style="background-color: #F1F3F6; border: none;"
+          formControlName="chiefComplaint"
+          placeholder="Enter your complaint"
+        ></textarea>
+        <div
+          *ngIf="customerAppointmentForm.get('chiefComplaint')?.touched && customerAppointmentForm.get('chiefComplaint')?.invalid"
+          class="text-danger mt-1"
+        >
+          Chief complaint is required and should be at least 10 characters.
+        </div>
+      </div>
+  
+      <!-- Fees -->
+      <div class="mb-4 d-flex justify-content-end align-items-center">
+        <label for="fees" class="form-label fw-semibold fs-5 mb-0 me-3">Fees : </label>
+        <span id="fees" class="fs-5 fw-bold text-success">{{ fees }}</span>
+      </div>
+  
+      <!-- Submit Button -->
+      <div class="text-center">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg w-50 fw-bold"
+          [disabled]="customerAppointmentForm.invalid"
+        >
+          Pay
+        </button>
+      </div>
+    </form>
+  }@else {
+    <form [formGroup]="distributorAppointmentForm" (ngSubmit)="bookAppointmentByDistributor()">
+      <div class="row mb-4">
+
+        <div class="col-md-4">
+          <label for="customer" class="form-label fw-semibold">Customer</label>
+          <select
+            id="customer"
+            class="form-select"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="customer"
+            (click)="getAllCustomer()"
+          >
+            <option value="" disabled>Select Customer</option>
+            <option *ngFor="let customer of allCustomer" [value]="customer.id">
+              {{ customer.firstName }} {{ customer.lastName }}
+            </option>
+          </select>
+          <div
+            *ngIf="distributorAppointmentForm.get('customer')?.touched && distributorAppointmentForm.get('customer')?.invalid"
+            class="text-danger mt-1"
+          >
+            Customer is required.
+          </div>
+        </div>
+
+
+        <!-- Speciality Dropdown -->
+        <div class="col-md-4">
+          <label for="specialisation" class="form-label fw-semibold">Speciality</label>
+          <select
+            id="specialisation"
+            class="form-select"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="specialisation"
+            (change)="onChange(distributorAppointmentForm.get('specialisation')?.value)"
+          >
+            <option value="" disabled>Select Speciality</option>
+            <option *ngFor="let specialisation of allSpecialisations" [value]="specialisation.id">
+              {{ specialisation.specialisationName }}
+            </option>
+          </select>
+          <div
+            *ngIf="distributorAppointmentForm.get('specialisation')?.touched && distributorAppointmentForm.get('specialisation')?.invalid"
+            class="text-danger mt-1"
+          >
+            Specialisation is required.
+          </div>
+        </div>
+  
+        <!-- Distributor Dropdown -->
+        <div class="col-md-4">
+          <label for="distributor" class="form-label fw-semibold">Distributor</label>
+          <select
+            id="distributor"
+            class="form-select"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="distributor"
+            (change)="onChangeDistributor(distributorAppointmentForm.get('distributor')?.value)"
+          >
+            <option value="" disabled>Select Distributor</option>
+            <option *ngFor="let distributor of allDistributors" [value]="distributor.id">
+              {{ distributor.firstName }} {{ distributor.lastName }} ₹{{ distributor.visitingCharge}}
+            </option>
+          </select>
+          <div
+            *ngIf="distributorAppointmentForm.get('distributor')?.touched && distributorAppointmentForm.get('distributor')?.invalid"
+            class="text-danger mt-1"
+          >
+            Distributor is required.
+          </div>
+        </div>
+      </div>
+  
+      <div class="row mb-4">
+        <!-- Date Picker -->
+        <div class="col-md-6">
+          <label for="date" class="form-label fw-semibold">Date</label>
+          <input
+            type="date"
+            id="date"
+            [min]="todayDate"
+            [max]="maxDate"
+            class="form-control"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="date"
+            (input)="onChangeDateForDistributor()"
+          />
+          <div
+            *ngIf="distributorAppointmentForm.get('date')?.touched && distributorAppointmentForm.get('date')?.invalid"
+            class="text-danger mt-1"
+          >
+            Please select a valid date.
+          </div>
+        </div>
+        
+        <!-- Time Picker -->
+        <div class="col-md-6">
+          <label for="time" class="form-label fw-semibold">Time</label>
+          <input
+            type="time"
+            id="time"
+            [min]="minTime" 
+            [max]="'20:00'"
+            class="form-control"
+            style="background-color: #F1F3F6; border: none;"
+            formControlName="time"
+            (input)="onChangeTimeForDistributor($event)"
+          />
+          <div
+            style="font-size: 13px"
+            *ngIf="distributorAppointmentForm.controls['time'].touched || distributorAppointmentForm.controls['time'].dirty"
+          >
+            <div *ngIf="distributorAppointmentForm.controls['time'].hasError('required')">
+              <div class="text-danger">*Time is required</div>
+            </div>
+            <div *ngIf="!isTimeValid && distributorAppointmentForm.controls['time'].touched">
+              <div class="text-danger">*Time must be at least 1 hour later than the current time</div>
+            </div>
+            <div *ngIf="!isTimeInRange && distributorAppointmentForm.controls['time'].touched">
+              <div class="text-danger">*Time must be between 08:00 and 20:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Chief Complaint -->
+      <div class="mb-4">
+        <label for="chiefComplaint" class="form-label fw-semibold">Chief Complaint</label>
+        <textarea
+          id="chiefComplaint"
+          class="form-control"
+          minlength="10"
+          maxlength="200"
+          rows="3"
+          style="background-color: #F1F3F6; border: none;"
+          formControlName="chiefComplaint"
+          placeholder="Enter your complaint"
+        ></textarea>
+        <div
+          *ngIf="distributorAppointmentForm.get('chiefComplaint')?.touched && distributorAppointmentForm.get('chiefComplaint')?.invalid"
+          class="text-danger mt-1"
+        >
+          Chief complaint is required and should be at least 10 characters.
+        </div>
+      </div>
+  
+      <!-- Fees -->
+      <div class="mb-4 d-flex justify-content-end align-items-center">
+        <label for="fees" class="form-label fw-semibold fs-5 mb-0 me-3">Fees : </label>
+        <span id="fees" class="fs-5 fw-bold text-success">{{ fees }}</span>
+      </div>
+  
+      <!-- Submit Button -->
+      <div class="text-center">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg w-50 fw-bold"
+          [disabled]="distributorAppointmentForm.invalid"
+        >
+          Pay
+        </button>
+      </div>
+    </form>
+  }
+  </div>
+
+
+
+
+  <div class="modal fade" id="waitingModal" tabindex="-1" aria-labelledby="waitingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="waitingModalLabel">Please Wait</h5>
+        </div>
+        <div class="modal-body text-center">
+          <h4>Time: <span id="counterValue">{{ counter }} seconds</span></h4>
+          <p>We sending mail of appointment.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  

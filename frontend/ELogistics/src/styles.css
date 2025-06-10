@@ -1,0 +1,36 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+    background-color: #F1F3F6;
+  }
+  
+  /* Optionally, you can apply to any other wrapper or component */
+  app-root {
+    background-color: #F1F3F6;
+    min-height: 100vh;
+  }
+
+  input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+::ng-deep .close-btn {
+  position: absolute;
+  top: 10px; /* Adjust the top position */
+  right: 10px;
+  bottom: 18px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #aaa; /* Set the color to gray */
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: block; /* Ensure it's always visible */
+}
+
+/* Hover effect for the close button */
+::ng-deep .close-btn:hover {
+  color: #000000; /* Change color on hover */
+}

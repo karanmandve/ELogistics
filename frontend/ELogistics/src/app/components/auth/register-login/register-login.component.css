@@ -1,0 +1,36 @@
+.loginRegister{
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+.card {
+    max-width: 500px;
+    margin: auto;
+    border-radius: 15px;
+    background-color: #f8f9fa;
+  }
+  .btn.active {
+    background-color: #007bff;
+    color: white;
+  }
+  .text-danger {
+    font-size: 0.9rem;
+  }
+
+  
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .resend-otp{
+    margin-top: 2rem;
+  }
+
+.resend-otp-btn{
+    width: 9.5rem;
+  }
+  
+  .card {
+    background-color: #f8f9fa;
+    border: 1px solid #eaeaea;
+  }

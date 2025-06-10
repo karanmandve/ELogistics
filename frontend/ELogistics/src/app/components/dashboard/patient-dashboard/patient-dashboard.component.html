@@ -1,0 +1,237 @@
+<div class="d-flex align-items-center justify-content-center mt-4">
+  <button
+    class="btn btn-primary d-flex align-items-center"
+    routerLink="/appointment"
+  >
+    <span class="me-2 d-flex align-items-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-calendar-plus"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"
+        ></path>
+        <path
+          d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"
+        ></path>
+      </svg>
+    </span>
+    Book Appointment
+  </button>
+</div>
+
+<!-- Appointments Cards -->
+<div class="container mt-5 mb-5">
+  <h3 class="text-center mb-4 fw-bold">Appointments</h3>
+
+  <div *ngIf="filterAppointments.length > 0; else noAppointments">
+    <div class="row g-4">
+      <div
+        class="col-md-6 col-lg-4"
+        *ngFor="let appointment of filterAppointments; let i = index"
+      >
+        <div class="card shadow-sm h-100 border-0 position-relative">
+          <!-- Schedule Label -->
+          @if (appointment.appointmentStatus === "Scheduled") {
+
+          <span class="schedule-label position-absolute"> Scheduled </span>
+          }@else {
+
+          <span class="schedule-label-cancel position-absolute">
+            Cancelled
+          </span>
+          }
+
+          <div class="card-body">
+            <!-- Distributor Name -->
+            <h5 class="card-title fw-bold mb-3">
+              {{ appointment.distributorName | titlecase }} (PR)
+            </h5>
+            <!-- Details -->
+            <p class="card-text mb-1">
+              <strong>Specialisation:</strong>
+              {{ appointment.specialisationName }}
+            </p>
+            <p class="card-text mb-1">
+              <strong>Date:</strong> {{ appointment.appointmentDate }}
+            </p>
+            <p class="card-text mb-1">
+              <strong>Time:</strong> {{ appointment.appointmentTime }}
+            </p>
+            <p class="card-text mb-1">
+              <strong>Chief Complaint:</strong> {{ appointment.chiefComplaint }}
+            </p>
+            <p class="card-text text-success fw-bold">
+              <strong>Fee:</strong> ₹{{ appointment.fee }}
+            </p>
+          </div>
+          @if (appointment.appointmentStatus === "Scheduled"){
+          <div class="card-footer bg-white border-0 d-flex justify-content-end">
+            <button
+            class="btn btn-sm btn-primary fw-semibold me-2"
+            [routerLink]="['/customer-chat', appointment.distributorId]"
+          >
+            Chat
+          </button>
+
+            
+            <!-- Edit Button -->
+            <button
+              class="btn btn-sm btn-warning me-2 fw-semibold"
+              (click)="onEditAppointment(appointment)"
+            >
+              Edit
+            </button>
+            <!-- Cancel Button -->
+            <button
+              class="btn btn-sm btn-danger fw-semibold"
+              (click)="confirmDeletion(appointment)"
+            >
+              Cancel
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Appointments Available -->
+  <ng-template #noAppointments>
+    <div class="text-center text-muted py-4">
+      <p>No schedule appointments available.</p>
+    </div>
+  </ng-template>
+</div>
+
+<!-- appointment.component.html -->
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="appointmentModal"
+  tabindex="-1"
+  aria-labelledby="appointmentModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="appointmentModalLabel">Appointment Form</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+          <!-- Appointment Date -->
+          <div class="mb-3">
+            <label for="appointmentDate" class="form-label fw-semibold"
+              >Appointment Date</label
+            >
+            <input
+              style="background-color: #f1f3f6; border: none"
+              id="appointmentDate"
+              type="date"
+              [min]="todayDate"
+              [max]="maxDate"
+              class="form-control"
+              formControlName="appointmentDate"
+              (input)="onChangeDate()"
+            />
+            <div
+              *ngIf="
+                appointmentForm.get('appointmentDate')?.invalid &&
+                appointmentForm.get('appointmentDate')?.touched
+              "
+              class="text-danger"
+            >
+              Date is required.
+            </div>
+          </div>
+
+          <!-- Appointment Time -->
+          <div class="mb-3">
+            <label for="appointmentTime" class="form-label fw-semibold"
+              >Appointment Time</label
+            >
+            <input
+              style="background-color: #f1f3f6; border: none"
+              id="appointmentTime"
+              type="time"
+              [min]="minTime" 
+              [max]="'20:00'"
+              class="form-control"
+              formControlName="appointmentTime"
+              (input)="onChangeTime($event)"
+            />
+            <div
+            style="font-size: 13px"
+            *ngIf="appointmentForm.controls['appointmentTime'].touched || appointmentForm.controls['appointmentTime'].dirty"
+          >
+            <div *ngIf="appointmentForm.controls['appointmentTime'].hasError('required')">
+              <div class="text-danger">*Time is required</div>
+            </div>
+            <div *ngIf="!isTimeValid && appointmentForm.controls['appointmentTime'].touched">
+              <div class="text-danger">*Time must be at least 1 hour later than the current time</div>
+            </div>
+            <div *ngIf="!isTimeInRange && appointmentForm.controls['appointmentTime'].touched">
+              <div class="text-danger">*Time must be between 08:00 and 20:00</div>
+            </div>
+          </div>
+          </div>
+
+          <!-- Chief Complaint -->
+          <div class="mb-3">
+            <label for="chiefComplaint" class="form-label fw-semibold"
+              >Chief Complaint</label
+            >
+            <textarea
+              style="background-color: #f1f3f6; border: none"
+              minlength="5"
+              maxlength="150"
+              id="chiefComplaint"
+              class="form-control"
+              formControlName="chiefComplaint"
+              rows="3"
+            ></textarea>
+            <div
+              *ngIf="
+                appointmentForm.get('chiefComplaint')?.invalid &&
+                appointmentForm.get('chiefComplaint')?.touched
+              "
+              class="text-danger"
+            >
+              Chief complaint is required (min 5 characters, max 200).
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="appointmentForm.invalid"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

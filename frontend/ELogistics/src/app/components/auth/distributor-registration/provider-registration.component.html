@@ -1,0 +1,551 @@
+<form [formGroup]="distributorRegisterForm" (ngSubmit)="onRegisterSubmit()">
+  <div class="row mb-4">
+  <div class="col-md-6">
+    <label for="registerFirstName" class="form-label fw-semibold">First Name</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="text"
+      minlength="2"
+      maxlength="20"
+      class="form-control"
+      id="registerFirstName"
+      formControlName="firstName"
+      placeholder="First Name"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('firstName')?.touched &&
+        distributorRegisterForm.get('firstName')?.invalid
+      "
+      class="text-danger"
+    >
+      <div *ngIf="distributorRegisterForm.get('firstName')?.errors?.['required']">
+        First name is required.
+      </div>
+      <div *ngIf="distributorRegisterForm.get('firstName')?.errors?.['minlength']">
+        First name must be at least 2 characters.
+      </div>
+      <div *ngIf="distributorRegisterForm.get('firstName')?.errors?.['maxlength']">
+        First name must not exceed 15 characters.
+      </div>
+      <div *ngIf="distributorRegisterForm.get('firstName')?.errors?.['pattern']">
+        First name can only contain letters with a single space between words.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <label for="registerLastName" class="form-label fw-semibold">Last Name</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="text"
+      minlength="2"
+      maxlength="25"
+      class="form-control"
+      id="registerLastName"
+      formControlName="lastName"
+      placeholder="Last Name"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('lastName')?.touched &&
+        distributorRegisterForm.get('lastName')?.invalid
+      "
+      class="text-danger"
+    >
+      <div *ngIf="distributorRegisterForm.get('lastName')?.errors?.['required']">
+        Last name is required.
+      </div>
+      <div *ngIf="distributorRegisterForm.get('lastName')?.errors?.['minlength']">
+        Last name must be at least 2 characters.
+      </div>
+      <div *ngIf="distributorRegisterForm.get('lastName')?.errors?.['maxlength']">
+        Last name must not exceed 15 characters.
+      </div>
+      <div *ngIf="distributorRegisterForm.get('lastName')?.errors?.['pattern']">
+        Last name can only contain letters with a single space between words.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6">
+    <label for="registerEmail" class="form-label fw-semibold">Email</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="text"
+      maxlength="50"
+      class="form-control"
+      id="registerEmail"
+      formControlName="email"
+      placeholder="Enter your email"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('email')?.touched &&
+        distributorRegisterForm.get('email')?.invalid
+      "
+      class="text-danger"
+    >
+      <!-- Required error -->
+      <div *ngIf="distributorRegisterForm.get('email')?.errors?.['required']">
+        Email is required.
+      </div>
+      <!-- Invalid email format error -->
+      <div *ngIf="distributorRegisterForm.get('email')?.errors?.['email']">
+        Please enter a valid email address.
+      </div>
+      <!-- Exceeds maximum length error -->
+      <div *ngIf="distributorRegisterForm.get('email')?.errors?.['maxlength']">
+        Email must not exceed 50 characters.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <label for="registerMobile" class="form-label fw-semibold">Mobile Number</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="tel"
+      class="form-control"
+      id="registerMobile"
+      formControlName="mobile"
+      placeholder="Enter your mobile number"
+      required
+      maxlength="10"
+      (keypress)="acceptNumberOnly($event)"
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('mobile')?.touched &&
+        distributorRegisterForm.get('mobile')?.invalid
+      "
+      class="text-danger"
+    >
+      <!-- Required error -->
+      <div *ngIf="distributorRegisterForm.get('mobile')?.errors?.['required']">
+        Mobile number is required.
+      </div>
+      <!-- Invalid number pattern error -->
+      <div *ngIf="distributorRegisterForm.get('mobile')?.errors?.['pattern']">
+        Please enter a valid 10-digit mobile number.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-4">
+    <label for="registerDOB" class="form-label fw-semibold">Date of Birth</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="date"
+      [max]="todayDate"
+      [min]="pastDate"
+      class="form-control"
+      id="registerDOB"
+      formControlName="dateOfBirth"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('dateOfBirth')?.touched &&
+        distributorRegisterForm.get('dateOfBirth')?.invalid
+      "
+      class="text-danger"
+    >
+      <!-- Required error -->
+      <div
+        *ngIf="distributorRegisterForm.get('dateOfBirth')?.errors?.['required']"
+      >
+        Date of birth is required.
+      </div>
+      <!-- Future date error -->
+      <div
+        *ngIf="distributorRegisterForm.get('dateOfBirth')?.errors?.['futureDate']"
+      >
+        Date of birth cannot be in the future.
+      </div>
+      <div
+        *ngIf="distributorRegisterForm.get('dateOfBirth')?.errors?.['pastDate']"
+      >
+        Date of birth cannot be earlier than January 1, 1901.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <label for="gender" class="form-label fw-semibold">Gender</label>
+    <select style="background-color: #F1F3F6; border: none;" class="form-control rounded-3" id="gender" formControlName="gender">
+      <option value="" selected disabled>Select a gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+    <div
+      *ngIf="
+        distributorRegisterForm.get('gender')?.invalid &&
+        distributorRegisterForm.get('gender')?.touched
+      "
+      class="text-danger small mt-1"
+    >
+      Gender is required.
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <label for="bloodGroup" class="form-label fw-semibold">Blood Group</label>
+    <select style="background-color: #F1F3F6; border: none;"
+      class="form-control rounded-3"
+      id="bloodGroup"
+      formControlName="bloodGroup"
+    >
+      <option value="" selected disabled>Select a blood group</option>
+      <option value="A+">A+</option>
+      <option value="A-">A-</option>
+      <option value="B+">B+</option>
+      <option value="B-">B-</option>
+      <option value="AB+">AB+</option>
+      <option value="AB-">AB-</option>
+      <option value="O+">O+</option>
+      <option value="O-">O-</option>
+    </select>
+    <div
+      *ngIf="
+        distributorRegisterForm.get('bloodGroup')?.invalid &&
+        distributorRegisterForm.get('bloodGroup')?.touched
+      "
+      class="text-danger small mt-1"
+    >
+      Blood group is required.
+    </div>
+  </div>
+</div>
+
+  <div>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="hidden"
+      id="userRole"
+      formControlName="userTypeId"
+    />
+
+    <div
+      *ngIf="distributorRegisterForm.get('userTypeId')?.invalid && distributorRegisterForm.get('userTypeId')?.touched"
+      class="text-danger small mt-1"
+    >
+      Role is required.
+    </div>
+  </div>
+  
+
+ 
+  <div class="mb-3">
+    <label for="registerAddress" class="form-label fw-semibold">Address</label>
+    <textarea
+      style="background-color: #F1F3F6; border: none;"
+      type=""
+      min="10"
+      max="150"
+      minlength="10"
+      maxlength="150"
+      class="form-control"
+      id="registerAddress"
+      formControlName="address"
+      placeholder="Enter your address"
+      required
+    ></textarea>
+    <div
+      *ngIf="
+        distributorRegisterForm.get('address')?.touched &&
+        distributorRegisterForm.get('address')?.invalid
+      "
+      class="text-danger"
+    >
+      <!-- Required error -->
+      <div *ngIf="distributorRegisterForm.get('address')?.errors?.['required']">
+        Address is required.
+      </div>
+      <!-- Min Length error -->
+      <div *ngIf="distributorRegisterForm.get('address')?.errors?.['minlength']">
+        Address must be at least 10 characters long.
+      </div>
+      <!-- Max Length error -->
+      <div *ngIf="distributorRegisterForm.get('address')?.errors?.['maxlength']">
+        Address cannot exceed 150 characters.
+      </div>
+      <!-- Pattern error -->
+      <div *ngIf="distributorRegisterForm.get('address')?.errors?.['pattern']">
+        Address can only contain letters, numbers, spaces, commas, periods, and
+        hyphens.
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row mb-4">
+  <div class="col-md-6">
+    <label for="registerPincode" class="form-label fw-semibold">Pincode</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="text"
+      minlength="6"
+      maxlength="6"
+      class="form-control"
+      id="registerPincode"
+      formControlName="pincode"
+      placeholder="Enter your Pincode"
+      (keypress)="acceptNumberOnly($event)"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('pincode')?.touched &&
+        distributorRegisterForm.get('pincode')?.invalid
+      "
+      class="text-danger"
+    >
+      <div *ngIf="distributorRegisterForm.get('pincode')?.errors?.['required']">
+        Pincode is required.
+      </div>
+
+      <div *ngIf="distributorRegisterForm.get('pincode')?.errors?.['pattern']">
+        Please enter a valid 6-digit Pincode.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <label for="country" class="form-label fw-semibold">Country</label>
+    <select style="background-color: #F1F3F6; border: none;"
+      (change)="onChange(distributorRegisterForm.value.countryId)"
+      formControlName="countryId"
+      name="country"
+      class="form-control"
+      id="country"
+      required
+    >
+      <option value="" disabled selected>Select a country</option>
+      <option *ngFor="let country of allCountry" [value]="country.countryId">
+        {{ country.name }}
+      </option>
+    </select>
+    <div
+      *ngIf="
+        distributorRegisterForm.get('countryId')?.invalid &&
+        distributorRegisterForm.get('countryId')?.touched
+      "
+      class="text-danger small mt-1"
+    >
+      Country is required.
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6">
+    <label for="state" class="form-label fw-semibold">State</label>
+    <select style="background-color: #F1F3F6; border: none;"
+      formControlName="stateId"
+      name="state"
+      class="form-control"
+      id="state"
+      required
+    >
+      <option value="" disabled selected>Select a state</option>
+      <option *ngFor="let state of allState" [value]="state.stateId">
+        {{ state.name }}
+      </option>
+    </select>
+    <div
+      *ngIf="
+        distributorRegisterForm.get('stateId')?.invalid &&
+        distributorRegisterForm.get('stateId')?.touched
+      "
+      class="text-danger small mt-1"
+    >
+      State is required.
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <label for="registerCity" class="form-label fw-semibold">City</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      maxlength="30"
+      type="text"
+      class="form-control"
+      id="registerCity"
+      formControlName="city"
+      placeholder="Enter your city"
+      required
+      (keypress)="acceptCharacterOnly($event)"
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('city')?.touched &&
+        distributorRegisterForm.get('city')?.invalid
+      "
+      class="text-danger"
+    >
+      <!-- Required error -->
+      <div *ngIf="distributorRegisterForm.get('city')?.errors?.['required']">
+        City is required.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- Qualification Field -->
+
+  <div class="row mb-4">
+  <div class="col-md-6">
+    <label for="qualification" class="form-label fw-semibold">Qualification</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      maxlength="20"
+      type="text"
+      class="form-control"
+      id="qualification"
+      formControlName="qualification"
+      placeholder="Enter your qualification"
+      (keypress)="acceptCharacterOnly($event)"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('qualification')?.touched &&
+        distributorRegisterForm.get('qualification')?.invalid
+      "
+      class="text-danger small mt-1"
+    >
+      Qualification is required.
+    </div>
+  </div>
+
+  <!-- Specialisation Dropdown -->
+  <div class="col-md-6">
+    <label for="specialisation" class="form-label fw-semibold">Specialisation</label>
+    <select style="background-color: #F1F3F6; border: none;"
+      formControlName="specialisationId"
+      class="form-control"
+      id="specialisation"
+      required
+    >
+      <option value="" disabled selected>Select a specialisation</option>
+      <option
+        *ngFor="let specialisation of allSpecialisations"
+        [value]="specialisation.id"
+      >
+        {{ specialisation.specialisationName }}
+      </option>
+    </select>
+    <div
+      *ngIf="
+        distributorRegisterForm.get('specialisationId')?.touched &&
+        distributorRegisterForm.get('specialisationId')?.invalid
+      "
+      class="text-danger small mt-1"
+    >
+      Specialisation is required.
+    </div>
+  </div>
+
+</div>
+
+  <!-- Registration Number Field -->
+
+  <div class="row mb-4">
+  <div class="col-md-6">
+    <label for="registrationNumber" class="form-label fw-semibold"
+      >Registration Number</label
+    >
+    <input style="background-color: #F1F3F6; border: none;"
+      maxlength="10"
+      type="text"
+      class="form-control"
+      id="registrationNumber"
+      formControlName="registrationNumber"
+      placeholder="Enter your registration number"
+      (keypress)="acceptNumberOnly($event)"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('registrationNumber')?.touched &&
+        distributorRegisterForm.get('registrationNumber')?.invalid
+      "
+      class="text-danger small mt-1"
+    >
+      Registration number is required.
+    </div>
+  </div>
+
+  <!-- Visiting Charge Field -->
+  <div class="col-md-6">
+    <label for="visitingCharge" class="form-label fw-semibold">Visiting Charge</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      type="text"
+      maxlength="5"
+      class="form-control"
+      id="visitingCharge"
+      formControlName="visitingCharge"
+      placeholder="Enter visiting charge"
+        (keypress)="acceptNumberOnly($event)"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('visitingCharge')?.touched &&
+        distributorRegisterForm.get('visitingCharge')?.invalid
+      "
+      class="text-danger small mt-1"
+    >
+      Visiting charge is required and must be a valid number.
+    </div>
+  </div>
+</div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold" for="file">Upload File:</label>
+    <input style="background-color: #F1F3F6; border: none;"
+      class="form-control"
+      id="file"
+      type="file"
+      formControlName="file"
+      accept=".jpg, .jpeg, .png"
+      (change)="onFileSelected($event)"
+      required
+    />
+    <div
+      *ngIf="
+        distributorRegisterForm.get('file')?.touched &&
+        distributorRegisterForm.get('file')?.invalid
+      "
+      class="text-danger"
+    >
+      <div *ngIf="distributorRegisterForm.get('file')?.errors?.['required']">
+        Profile picture is required.
+      </div>
+      <div *ngIf="distributorRegisterForm.get('file')?.errors?.['invalidType']">
+        Only JPG, JPEG, and PNG files are allowed.
+      </div>
+      <div *ngIf="fileSizeError" class="text-danger">
+        The file size must not exceed 5 MB.
+      </div>
+    </div>
+  </div>
+  <!-- <div *ngIf="imagePreview">
+      <p>Image Preview:</p>
+      <img [src]="imagePreview" alt="Profile Preview" style="max-width: 150px; border: 1px solid #ccc;" />
+    </div> -->
+
+    <button
+    type="submit"
+    [disabled]="distributorRegisterForm.invalid"
+    class="btn btn-primary w-100"
+  >
+    Register
+  </button>
+
+
+
+</form>
