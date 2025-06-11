@@ -8,5 +8,5 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { customInterceptor } from './interceptor/custom.interceptor';
 
 export const appConfig: ApplicationConfig = {
-  distributors: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideToastr(), provideAnimations(), provideHttpClient(withInterceptors([customInterceptor]))]
+  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideToastr(), provideAnimations(), provideHttpClient(withInterceptors([customInterceptor]))]
 };

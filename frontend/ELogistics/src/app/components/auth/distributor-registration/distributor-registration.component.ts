@@ -30,7 +30,7 @@ export class DistributorRegistrationComponent {
 
     ngOnInit() {
       this.getAllCountry();
-      this.getAllSpecialization();
+      // this.getAllSpecialization();
       this.sanitizeField('firstName');
       this.sanitizeField('lastName');
       this.sanitizeFieldForEmail("email");
@@ -92,17 +92,17 @@ export class DistributorRegistrationComponent {
       });
     }
 
-    getAllSpecialization(){
-      this.userService.getSpecialization().subscribe({
-        next : (res: any) => {
-          this.allSpecialisations = res.data
+    // getAllSpecialization(){
+    //   this.userService.getSpecialization().subscribe({
+    //     next : (res: any) => {
+    //       this.allSpecialisations = res.data
           
-        },
-        error : (error: any) => {
-          console.log(error);
-        }
-      })
-    }
+    //     },
+    //     error : (error: any) => {
+    //       console.log(error);
+    //     }
+    //   })
+    // }
   
     getAllCountry(){
       this.countryStateService.getAllCountry().subscribe({

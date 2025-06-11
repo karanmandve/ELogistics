@@ -8,14 +8,13 @@ import { LoaderService } from '../../../services/loader/loader.service';
 import { CountryStateServiceService } from '../../../services/country-state-service/country-state-service.service';
 import { SweetAlertToasterService } from '../../../services/toaster/sweet-alert-toaster.service';
 import { DistributorRegistrationComponent } from "../distributor-registration/distributor-registration.component";
-import { LoginComponent } from "../login/login.component";
 import { CustomerRegistrationComponent } from "../customer-registration/customer-registration.component";
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-register-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LoginComponent, CustomerRegistrationComponent, DistributorRegistrationComponent],
+  imports: [CommonModule, ReactiveFormsModule, CustomerRegistrationComponent, DistributorRegistrationComponent],
   templateUrl: './register-login.component.html',
   styleUrl: './register-login.component.css'
 })

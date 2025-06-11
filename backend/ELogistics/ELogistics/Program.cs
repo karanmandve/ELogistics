@@ -47,7 +47,7 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "VoiceChatApp", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "ELogistics", Version = "v1" });
 
 
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
