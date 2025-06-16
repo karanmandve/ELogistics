@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormGroup, FormControl, Validators, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CountryStateServiceService } from '../../../services/country-state-service/country-state-service.service';
@@ -21,6 +21,7 @@ export class DistributorRegistrationComponent {
     allCountry : any [] = []
     fileSizeError = false;
     allSpecialisations: any[] = [];
+    @Output() registered = new EventEmitter<void>();
   
     toaster = inject(SweetAlertToasterService);
     router = inject(Router);
@@ -29,33 +30,66 @@ export class DistributorRegistrationComponent {
 
 
     ngOnInit() {
-      this.getAllCountry();
-      // this.getAllSpecialization();
+      this.getAllStates();
       this.sanitizeField('firstName');
       this.sanitizeField('lastName');
       this.sanitizeFieldForEmail("email");
     }
 
 
-   distributorRegisterForm = new FormGroup({
-      firstName: new FormControl('', [Validators.required, Validators.minLength(2), Validators.maxLength(20),Validators.pattern(/^[A-Za-z]+(?: [A-Za-z]+)*\s*$/)]),
-      lastName: new FormControl('', [Validators.required, Validators.minLength(2), Validators.maxLength(25),Validators.pattern(/^[A-Za-z]+(?: [A-Za-z]+)*\s*$/)]),
-      email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(50)]),
-      mobile: new FormControl('', [Validators.required, Validators.pattern(/^\d{10}$/)]),
-      dateOfBirth: new FormControl('', [Validators.required, this.futureDateValidator]),
-      gender: new FormControl('', Validators.required),
-      bloodGroup: new FormControl('', Validators.required),
-      city: new FormControl('', [Validators.required]),
-      userTypeId: new FormControl(1, Validators.required),
-      file: new FormControl<File | null>(null, Validators.required),
-      address: new FormControl('', [Validators.required, Validators.minLength(10), Validators.maxLength(150), Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/)]),
-      pincode: new FormControl("", [Validators.required, Validators.pattern(/^\d{6}$/), Validators.minLength(6), Validators.maxLength(6)]),
-      countryId: new FormControl("", Validators.required),
-      stateId: new FormControl("", Validators.required),
-      qualification: new FormControl("", Validators.required),
-      specialisationId : new FormControl("", Validators.required),
-      registrationNumber : new FormControl("", Validators.required),
-      visitingCharge: new FormControl("", Validators.required)
+    distributorRegisterForm = new FormGroup({
+      firstName: new FormControl('', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(25),
+        Validators.pattern(/^[A-Za-z]+(?: [A-Za-z]+)*\s*$/),
+      ]),
+      lastName: new FormControl('', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(25),
+        Validators.pattern(/^[A-Za-z]+(?: [A-Za-z]+)*\s*$/),
+      ]),
+      email: new FormControl('', [
+        Validators.required,
+        Validators.email,
+        Validators.maxLength(50),
+      ]),
+      password: new FormControl('', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(20),
+        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/), // at least 1 letter, 1 number
+      ]),
+      phoneNumber: new FormControl('', [
+        Validators.required,
+        Validators.pattern(/^\d{10}$/),
+      ]),
+      stateId: new FormControl('', [Validators.required]),
+      city: new FormControl('', [
+        Validators.required,
+        Validators.maxLength(30),
+        Validators.pattern(/^[A-Za-z ]+$/),
+      ]),
+      zip: new FormControl('', [
+        Validators.required,
+        Validators.pattern(/^\d{6}$/),
+        Validators.minLength(6),
+        Validators.maxLength(6),
+      ]),
+      line1: new FormControl('', [
+        Validators.required,
+        Validators.minLength(5),
+        Validators.maxLength(100),
+        Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/),
+      ]),
+      line2: new FormControl('', [
+        Validators.maxLength(100),
+        Validators.pattern(/^[a-zA-Z0-9\s,.-]*$/),
+      ]),
+      GSTNumber: new FormControl('', [
+        Validators.pattern(/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/)
+      ]), // GSTIN format validation, optional
     })
 
 
@@ -92,30 +126,6 @@ export class DistributorRegistrationComponent {
       });
     }
 
-    // getAllSpecialization(){
-    //   this.userService.getSpecialization().subscribe({
-    //     next : (res: any) => {
-    //       this.allSpecialisations = res.data
-          
-    //     },
-    //     error : (error: any) => {
-    //       console.log(error);
-    //     }
-    //   })
-    // }
-  
-    getAllCountry(){
-      this.countryStateService.getAllCountry().subscribe({
-        next : (res: any) => {
-          this.allCountry = res.data
-        },
-        error : (error: any) =>{
-          console.log(error);
-          // alert("I am in error")
-        }
-        
-      })
-    }
 
       futureDateValidator(control: FormControl): ValidationErrors | null {
         const today = new Date();
@@ -139,19 +149,16 @@ export class DistributorRegistrationComponent {
           this.toaster.error('Please Fill And Correct All The fields');
           return;
         }
-    
-        const formData = new FormData();
-        Object.keys(this.distributorRegisterForm.controls).forEach((field) => {
-          const value = this.distributorRegisterForm.get(field)?.value;
-          formData.append(field, value);
-        });
-    
-        this.userService.addUser(formData).subscribe({
+
+        // Clone the form value and add userTypeId
+        const payload = { ...this.distributorRegisterForm.value, userTypeId: 1 };
+
+        this.userService.addUser(payload).subscribe({
           next: (res: any) => {
             this.distributorRegisterForm.reset();
             if (res.statusCode == 201) {
-              window.location.reload();
               this.toaster.success('Distributor Register Successfully');
+              this.registered.emit();
             } else {
               this.toaster.error('Distributor Not Register');
             }
@@ -186,56 +193,14 @@ export class DistributorRegistrationComponent {
         }
       }
     
-      onChange(countrId : any){
-        this.countryStateService.getStateByCountryId(countrId).subscribe({
-          next : (res:any) => {
-            this.allState = res.data
+      getAllStates() {
+        this.countryStateService.getAllState().subscribe({
+          next: (res: any) => {
+            this.allState = res.data || res;
           },
-          error : (error: any) => {
+          error: (error: any) => {
             console.log(error);
-            // alert("I am in error")
           }
-        })
-      }
-    
-      onFileSelected(event: Event) {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        const maxSize = 5 * 1024 * 1024;
-      
-        if (file) {
-          const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-          // Validate file type
-          if (!validTypes.includes(file.type)) {
-            this.distributorRegisterForm.get('file')?.setErrors({ invalidType: true });
-            if (event.target instanceof HTMLInputElement) {
-              event.target.value = ''; // Clear invalid input
-            }
-            // return; // Exit if invalid type
-          } else {
-            this.distributorRegisterForm.get('file')?.setErrors(null);
-          }
-      
-          // Validate file size
-          if (file.size > maxSize) {
-            this.fileSizeError = true;
-            if (event.target instanceof HTMLInputElement) {
-              event.target.value = ''; // Clear input if size is too large
-            }
-            return; // Exit if size exceeds limit
-          } else {
-            this.fileSizeError = false;
-          }
-      
-          // Set the file value in the form
-          this.distributorRegisterForm.patchValue({ file });
-          this.distributorRegisterForm.get('file')?.updateValueAndValidity();
-      
-          // File is valid, read and preview it
-          // const reader = new FileReader();
-          // reader.onload = () => {
-          //   this.imagePreview = reader.result as string; // Set the preview
-          // };
-          // reader.readAsDataURL(file);
-        }
+        });
       }
 }

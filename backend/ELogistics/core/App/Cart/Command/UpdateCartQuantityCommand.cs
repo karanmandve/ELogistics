@@ -1,7 +1,7 @@
 ﻿using core.API_Response;
 using core.Interface;
 using domain.Model.Cart;
-using domain.ModelDto;
+using domain.ModelDtos;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;

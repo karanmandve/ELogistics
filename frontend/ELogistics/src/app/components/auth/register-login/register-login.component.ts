@@ -9,12 +9,13 @@ import { CountryStateServiceService } from '../../../services/country-state-serv
 import { SweetAlertToasterService } from '../../../services/toaster/sweet-alert-toaster.service';
 import { DistributorRegistrationComponent } from "../distributor-registration/distributor-registration.component";
 import { CustomerRegistrationComponent } from "../customer-registration/customer-registration.component";
+import { LoginComponent } from '../login/login.component';
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-register-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CustomerRegistrationComponent, DistributorRegistrationComponent],
+  imports: [CommonModule, ReactiveFormsModule, CustomerRegistrationComponent, DistributorRegistrationComponent, LoginComponent],
   templateUrl: './register-login.component.html',
   styleUrl: './register-login.component.css'
 })
@@ -75,6 +76,8 @@ export class RegisterLoginComponent {
     this.activeForm = form;
 
   }
+
+
 
 
 }

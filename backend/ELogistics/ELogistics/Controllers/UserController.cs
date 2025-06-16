@@ -59,6 +59,18 @@ namespace EHR_Application.Controllers
         }
 
 
+        [HttpGet("get-all-distributor")]
+        public async Task<IActionResult> GetAllDistributor()
+        {
+            var result = await _mediator.Send(new GetAllDistributorQuery());
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+
+
         //         [HttpGet("forgot-password/{username}/{otp}")]
         //         public async Task<IActionResult> ForgotPassword(string username, string otp)
         //         {

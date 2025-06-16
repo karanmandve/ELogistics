@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace domain.ModelDto
+namespace domain.ModelDtos
 {
     public class CartQuantityChangeDto
     {

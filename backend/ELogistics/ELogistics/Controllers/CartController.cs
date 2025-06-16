@@ -44,7 +44,7 @@ namespace EComApplication.Controllers
         }
 
         [HttpPut("update-cart-quantity")]
-        public async Task<IActionResult> UpdateCartQuantity(domain.ModelDto.CartQuantityChangeDto quantityChangeData)
+        public async Task<IActionResult> UpdateCartQuantity(domain.ModelDtos.CartQuantityChangeDto quantityChangeData)
         {
             if (quantityChangeData == null || (quantityChangeData.QuantityChange != 1 && quantityChangeData.QuantityChange != -1))
             {

@@ -16,17 +16,17 @@ export class UserServiceService {
 
 
 
-  // fetchUserData(username: any): Observable<any> {
-  //   return this.http.get(`https://localhost:7228/api/User/get-user-details/${username}`)
-  // }
+  fetchUserData(username: any): Observable<any> {
+    return this.http.get(`https://localhost:7228/api/User/get-user-details/${username}`)
+  }
 
-  // updateUserDetails(username: any) {
-  //   this.fetchUserData(username).subscribe({
-  //     next: (res: any) => {
-  //       this.setUserData(res.data);
-  //     }
-  //   })
-  // }
+  updateUserDetails(username: any) {
+    this.fetchUserData(username).subscribe({
+      next: (res: any) => {
+        this.setUserData(res.data);
+      }
+    })
+  }
 
   setUserData(user: any) {
     this.userSubject.next(user);
@@ -86,5 +86,8 @@ export class UserServiceService {
   //   return this.http.post("https://localhost:7228/api/User/change-password", data)
   // }
 
+  getAllDistributors(): Observable<any[]> {
+    return this.http.get<any[]>("https://localhost:7228/api/User/get-all-distributor");
+  }
 
 }

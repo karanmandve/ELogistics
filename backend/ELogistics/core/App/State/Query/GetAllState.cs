@@ -1,22 +1,13 @@
-﻿/*
-// using core.API_Response;
-// using core.Interface;
-// using Dapper;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
-// using System;
-// using System.Collections.Generic;
-// using System.Linq;
-// using System.Text;
-// using System.Threading.Tasks;
-// using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+﻿using core.API_Response;
+using core.Interface;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.Core.Apps.State.Query
 {
     public class GetAllState : IRequest<AppResponse<object>>
     {
     }
-
 
     public class GetAllStateQueryHandler : IRequestHandler<GetAllState, AppResponse<object>>
     {
@@ -29,19 +20,8 @@ namespace App.Core.Apps.State.Query
 
         public async Task<AppResponse<object>> Handle(GetAllState request, CancellationToken cancellationToken)
         {
-            var connection = _appDbContext.GetConnection();
-            var query = "SELECT * FROM States";
-            var allState = await connection.QueryAsync<domain.Model.State.State>(query);
-
-            return AppResponse.Success<object>(allState.ToList(), "Successfully Fetch All State", HttpStatusCodes.OK);
+            var allState = await _appDbContext.Set<domain.Model.States.State>().ToListAsync(cancellationToken);
+            return AppResponse.Success<object>(allState, "Successfully Fetch All State", HttpStatusCodes.OK);
         }
     }
-
-
-
-
-
-
-
 }
-*/

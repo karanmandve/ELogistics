@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -20,32 +20,31 @@ import { CommonModule } from '@angular/common';
   styleUrl: './customer-registration.component.css',
 })
 export class CustomerRegistrationComponent {
-
+  allDistributors: any[] = [];
   todayDate = new Date().toISOString().split('T')[0];
   pastDate = new Date('1901-01-01').toISOString().split('T')[0];
   allState: any;
-  allCountry : any [] = []
+  allCountry: any[] = [];
   fileSizeError = false;
+  @Output() registered = new EventEmitter<void>();
 
   toaster = inject(SweetAlertToasterService);
   router = inject(Router);
   userService = inject(UserServiceService);
   countryStateService = inject(CountryStateServiceService);
 
-
   ngOnInit() {
-    this.getAllCountry();
-    this.sanitizeField('firstName');
+    this.getAllStates();
     this.sanitizeField('lastName');
-    this.sanitizeFieldForEmail("email");
+    // this.sanitizeFieldForEmail('email'); 
+    this.getAllDistributors();
   }
-
 
   customerRegisterForm = new FormGroup({
     firstName: new FormControl('', [
       Validators.required,
       Validators.minLength(2),
-      Validators.maxLength(20),
+      Validators.maxLength(25),
       Validators.pattern(/^[A-Za-z]+(?: [A-Za-z]+)*\s*$/),
     ]),
     lastName: new FormControl('', [
@@ -59,33 +58,42 @@ export class CustomerRegistrationComponent {
       Validators.email,
       Validators.maxLength(50),
     ]),
-    mobile: new FormControl('', [
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+      Validators.maxLength(20),
+      Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/), // at least 1 letter, 1 number
+    ]),
+    phoneNumber: new FormControl('', [
       Validators.required,
       Validators.pattern(/^\d{10}$/),
     ]),
-    dateOfBirth: new FormControl('', [
+    stateId: new FormControl('', [Validators.required]),
+    city: new FormControl('', [
       Validators.required,
-      this.futureDateValidator,
+      Validators.maxLength(30),
+      Validators.pattern(/^[A-Za-z ]+$/),
     ]),
-    gender: new FormControl('', Validators.required),
-    bloodGroup: new FormControl('', Validators.required),
-    city: new FormControl('', [Validators.required]),
-    userTypeId: new FormControl(2, Validators.required),
-    file: new FormControl<File | null>(null, Validators.required),
-    address: new FormControl('', [
-      Validators.required,
-      Validators.minLength(10),
-      Validators.maxLength(150),
-      Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/),
-    ]),
-    pincode: new FormControl('', [
+    zip: new FormControl('', [
       Validators.required,
       Validators.pattern(/^\d{6}$/),
       Validators.minLength(6),
       Validators.maxLength(6),
     ]),
-    countryId: new FormControl('', Validators.required),
-    stateId: new FormControl('', Validators.required),
+    line1: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(100),
+      Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/),
+    ]),
+    line2: new FormControl('', [
+      Validators.maxLength(100),
+      Validators.pattern(/^[a-zA-Z0-9\s,.-]*$/),
+    ]),
+    distributorId: new FormControl('', [Validators.required]),
+    GSTNumber: new FormControl('', [
+      Validators.pattern(/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/),
+    ]), // GSTIN format validation, optional
   });
 
   futureDateValidator(control: FormControl): ValidationErrors | null {
@@ -111,21 +119,15 @@ export class CustomerRegistrationComponent {
       return;
     }
 
-    const formData = new FormData();
-    Object.keys(this.customerRegisterForm.controls).forEach((field) => {
-      const value = this.customerRegisterForm.get(field)?.value;
-      formData.append(field, value);
-    });
+    // Clone the form value and add userTypeId
+    const payload = { ...this.customerRegisterForm.value, userTypeId: 2 };
 
-    this.userService.addUser(formData).subscribe({
+    this.userService.addUser(payload).subscribe({
       next: (res: any) => {
         this.customerRegisterForm.reset();
         if (res.statusCode == 201) {
           this.toaster.success('Customer Register Successfully');
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-
+          this.registered.emit();
         } else {
           this.toaster.error('Customer Not Register');
         }
@@ -160,98 +162,58 @@ export class CustomerRegistrationComponent {
     }
   }
 
-  onChange(countrId : any){
+  onChange(countrId: any) {
     this.countryStateService.getStateByCountryId(countrId).subscribe({
-      next : (res:any) => {
-        this.allState = res.data
+      next: (res: any) => {
+        this.allState = res.data;
       },
-      error : (error: any) => {
+      error: (error: any) => {
         console.log(error);
         // alert("I am in error")
-      }
-    })
+      },
+    });
   }
 
-  onFileSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    const maxSize = 5 * 1024 * 1024;
-  
-    if (file) {
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-      // Validate file type
-      if (!validTypes.includes(file.type)) {
-        this.customerRegisterForm.get('file')?.setErrors({ invalidType: true });
-        if (event.target instanceof HTMLInputElement) {
-          event.target.value = ''; // Clear invalid input
-        }
-        // return; // Exit if invalid type
-      } else {
-        this.customerRegisterForm.get('file')?.setErrors(null);
-      }
-  
-      // Validate file size
-      if (file.size > maxSize) {
-        this.fileSizeError = true;
-        if (event.target instanceof HTMLInputElement) {
-          event.target.value = ''; // Clear input if size is too large
-        }
-        return; // Exit if size exceeds limit
-      } else {
-        this.fileSizeError = false;
-      }
-  
-      // Set the file value in the form
-      this.customerRegisterForm.patchValue({ file });
-      this.customerRegisterForm.get('file')?.updateValueAndValidity();
-  
-      // File is valid, read and preview it
-      // const reader = new FileReader();
-      // reader.onload = () => {
-      //   this.imagePreview = reader.result as string; // Set the preview
-      // };
-      // reader.readAsDataURL(file);
-    }
-  }
-
-
-
-  getAllCountry(){
+  getAllCountry() {
     this.countryStateService.getAllCountry().subscribe({
-      next : (res: any) => {
-        this.allCountry = res.data
+      next: (res: any) => {
+        this.allCountry = res.data;
       },
-      error : (error: any) =>{
+      error: (error: any) => {
         console.log(error);
         // alert("I am in error")
-      }
-      
-    })
+      },
+    });
+  }
+
+  getAllDistributors() {
+    this.userService.getAllDistributors().subscribe({
+      next: (res: any) => {
+        this.allDistributors = res.data;
+      },
+      error: (error: any) => {
+        console.log(error);
+      },
+    });
+  }
+
+  getAllStates() {
+    this.countryStateService.getAllState().subscribe({
+      next: (res: any) => {
+        this.allState = res.data || res;
+      },
+      error: (error: any) => {
+        console.log(error);
+      },
+    });
   }
 
   sanitizeField(fieldName: string): void {
     this.customerRegisterForm.get(fieldName)?.valueChanges.subscribe((value) => {
       if (value) {
-        
         const sanitizedValue = value
-          .replace(/[^A-Za-z\s]/g, '') 
-          .replace(/\s{2,}/g, ' '); 
-        if (value !== sanitizedValue) {
-          this.customerRegisterForm.get(fieldName)?.setValue(sanitizedValue, {
-            emitEvent: false, 
-          });
-        }
-      }
-    });
-  }
-
-
-  sanitizeFieldForEmail(fieldName: string): void {
-    this.customerRegisterForm.get(fieldName)?.valueChanges.subscribe((value) => {
-      if (value) {
-        const sanitizedValue = value
-          .replace(/[^A-Za-z0-9@._-]/g, '')
-          .replace(/\s{2,}/g, '') 
-          .trim(); 
+          .replace(/[^A-Za-z\s]/g, '')
+          .replace(/\s{2,}/g, ' ');
         if (value !== sanitizedValue) {
           this.customerRegisterForm.get(fieldName)?.setValue(sanitizedValue, {
             emitEvent: false, // Prevent triggering valueChanges again
@@ -261,4 +223,19 @@ export class CustomerRegistrationComponent {
     });
   }
 
+  sanitizeFieldForEmail(fieldName: string): void {
+    this.customerRegisterForm.get(fieldName)?.valueChanges.subscribe((value) => {
+      if (value) {
+        const sanitizedValue = value
+          .replace(/[^A-ZaZ0-9@._-]/g, '')
+          .replace(/\s{2,}/g, '')
+          .trim();
+        if (value !== sanitizedValue) {
+          this.customerRegisterForm.get(fieldName)?.setValue(sanitizedValue, {
+            emitEvent: false, // Prevent triggering valueChanges again
+          });
+        }
+      }
+    });
+  }
 }

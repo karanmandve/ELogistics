@@ -18,7 +18,7 @@ export class CountryStateServiceService {
   }
 
   getAllState(){
-    return this.http.get("https://localhost:7228/all-state");
+    return this.http.get("https://localhost:7228/api/State/get-all-state");
   }
 
 
