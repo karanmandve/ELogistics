@@ -1,36 +1,30 @@
 <form [formGroup]="loginForm" (ngSubmit)="sendOtpWithPasswordCheck()">
   <div class="mb-3">
-    <label for="loginUsername" class="form-label fw-semibold fw-semibold fw-semibold">Username</label>
+    <label for="loginEmail" class="form-label fw-semibold">Email</label>
     <input style="background-color: #F1F3F6; border: none;"
-      maxlength="20"
-      minlength="15"
-      type="username"
+      maxlength="50"
+      type="email"
       class="form-control"
-      id="loginUsername"
-      formControlName="username"
-      placeholder="Enter username"
+      id="loginEmail"
+      formControlName="email"
+      placeholder="Enter email"
       required
     />
-    <div
-      *ngIf="
-        loginForm.get('username')?.invalid && loginForm.get('username')?.touched
-      "
-      class="text-danger"
-    >
-      <div *ngIf="loginForm.get('username')?.errors?.['required']">
-        Username is required.
+    <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="text-danger">
+      <div *ngIf="loginForm.get('email')?.errors?.['required']">
+        Email is required.
       </div>
-      <div *ngIf="loginForm.get('username')?.errors?.['minlength']">
-        Username must be at least 15 characters.
+      <div *ngIf="loginForm.get('email')?.errors?.['email']">
+        Please enter a valid email address.
       </div>
-      <div *ngIf="loginForm.get('username')?.errors?.['maxlength']">
-        Username must not exceed 20 characters.
+      <div *ngIf="loginForm.get('email')?.errors?.['maxlength']">
+        Email must not exceed 50 characters.
       </div>
     </div>
   </div>
 
   <div class="mb-3">
-    <label for="loginPassword" class="form-label fw-semibold fw-semibold fw-semibold">Password</label>
+    <label for="loginPassword" class="form-label fw-semibold">Password</label>
     <input style="background-color: #F1F3F6; border: none;"
       type="password"
       minlength="8"
@@ -41,18 +35,16 @@
       placeholder="Password"
       required
     />
-    <div
-      *ngIf="
-        loginForm.get('password')?.invalid && loginForm.get('password')?.touched
-      "
-      class="text-danger"
-    >
-      <span *ngIf="loginForm.controls['password'].errors?.['required']"
-        >This is required</span
-      >
+    <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-danger">
+      <span *ngIf="loginForm.controls['password'].errors?.['required']">Password is required.</span>
       <span *ngIf="loginForm.controls['password'].errors?.['pattern']">
-        Password must be at least 8 characters long, contain an uppercase
-        letter, a lowercase letter, a number, and a special character
+        Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.
+      </span>
+      <span *ngIf="loginForm.controls['password'].errors?.['minlength']">
+        Password must be at least 8 characters.
+      </span>
+      <span *ngIf="loginForm.controls['password'].errors?.['maxlength']">
+        Password must not exceed 30 characters.
       </span>
     </div>
   </div>
@@ -137,7 +129,7 @@
               (click)="sendOtpWithPasswordCheck()"
               [disabled]="
                 otpSent ||
-                !loginForm.get('username')?.valid ||
+                !loginForm.get('email')?.valid ||
                 !loginForm.get('password')?.valid
               "
             >
@@ -216,40 +208,40 @@
       </div>
       <div class="modal-body">
         <form [formGroup]="forgetPasswordForm">
-          <!-- Username Field -->
+          <!-- Email Field -->
           <div class="mb-3">
-            <label for="loginUsername" class="form-label fw-semibold fw-semibold fw-semibold">Username</label>
+            <label for="loginUsername" class="form-label fw-semibold fw-semibold fw-semibold">Email</label>
             <input style="background-color: #F1F3F6; border: none;"
               maxlength="20"
               minlength="15"
-              type="username"
+              type="email"
               class="form-control"
               id="loginUsername"
-              formControlName="username"
-              placeholder="Enter username"
+              formControlName="email"
+              placeholder="Enter email"
               required
             />
             <div
               *ngIf="
-                forgetPasswordForm.get('username')?.invalid &&
-                forgetPasswordForm.get('username')?.touched
+                forgetPasswordForm.get('email')?.invalid &&
+                forgetPasswordForm.get('email')?.touched
               "
               class="text-danger"
             >
               <div
-                *ngIf="forgetPasswordForm.get('username')?.errors?.['required']"
+                *ngIf="forgetPasswordForm.get('email')?.errors?.['required']"
               >
-                Username is required.
+                Email is required.
               </div>
               <div
-                *ngIf="forgetPasswordForm.get('username')?.errors?.['minlength']"
+                *ngIf="forgetPasswordForm.get('email')?.errors?.['minlength']"
               >
-                Username must be at least 15 characters.
+                Email must be at least 15 characters.
               </div>
               <div
-                *ngIf="forgetPasswordForm.get('username')?.errors?.['maxlength']"
+                *ngIf="forgetPasswordForm.get('email')?.errors?.['maxlength']"
               >
-                Username must not exceed 20 characters.
+                Email must not exceed 20 characters.
               </div>
             </div>
           </div>
@@ -297,7 +289,7 @@
                 class="btn btn-secondary w-100 mb-2"
                 (click)="sendForgetOtp()"
                 [disabled]="
-                  forgetOtpSent || !forgetPasswordForm.get('username')?.valid
+                  forgetOtpSent || !forgetPasswordForm.get('email')?.valid
                 "
               >
                 Send OTP

@@ -1,0 +1,55 @@
+
+  <div class="container my-4">
+    <div class="row">
+      <div class="col-md-3 col-sm-6 mb-4" *ngFor="let product of products">
+        <div class="card shadow-sm">
+          <img [src]="product.productImageUrl" class="card-img-top" alt="{{ product.productName }}">
+          <div class="card-body">
+            <h5 class="card-title">{{ product.productName }}</h5>
+            <p class="card-text">{{ product.category }}</p>
+            <p class="text-muted">₹{{ product.sellingPrice }}</p>
+            <!-- <button
+              class="btn btn-primary w-100"
+              (click)="addToCart(product)"
+            >
+              Add to Cart
+            </button> -->
+            <button class="btn btn-primary w-100" *ngIf="!isProductInCart(product.id)" (click)="addToCart(product)">
+              Add to Cart
+            </button>
+            <button class="btn btn-primary w-100" disabled="true" *ngIf="isProductInCart(product.id)">
+              Already in Cart
+            </button>
+            <button class="btn btn-info w-100 mt-2" (click)="openModal(product)">See Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+
+  <!-- Modal for Product Details -->
+  <div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productDetailsModalLabel">{{selectedProduct?.productName}}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img [src]="selectedProduct?.productImageUrl" class="img-fluid mt-3 mb-3" alt="{{selectedProduct?.productName}}">
+          <p><strong>Category:</strong> {{selectedProduct?.category}}</p>
+          <p><strong>Product Code:</strong> {{selectedProduct?.productCode}}</p>
+          <p><strong>Stock:</strong> {{selectedProduct?.stock}}</p>
+          <p><strong>Purchase Price:</strong> ₹{{selectedProduct?.purchasePrice}}</p>
+          <p><strong>Selling Price:</strong> ₹{{selectedProduct?.sellingPrice}}</p>
+          <p><strong>Purchase Date:</strong> {{selectedProduct?.purchaseDate | date: 'longDate'}}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

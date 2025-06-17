@@ -10,18 +10,22 @@ export class UserServiceService {
   
   private userSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   public user$: Observable<any> = this.userSubject.asObservable();
-
-
+  email: string | null = "";
+  
+  
   http = inject(HttpClient);
-
-
-
-  fetchUserData(username: any): Observable<any> {
-    return this.http.get(`https://localhost:7228/api/User/get-user-details/${username}`)
+  
+  ngOnInit() {
+    this.email = localStorage.getItem('email');
+    this.updateUserDetails(this.email);
   }
 
-  updateUserDetails(username: any) {
-    this.fetchUserData(username).subscribe({
+  fetchUserData(email: any): Observable<any> {
+    return this.http.get(`https://localhost:7228/api/User/get-user-details/${email}`)
+  }
+
+  updateUserDetails(email: any) {
+    this.fetchUserData(email).subscribe({
       next: (res: any) => {
         this.setUserData(res.data);
       }
@@ -46,16 +50,16 @@ export class UserServiceService {
     return this.http.post("https://localhost:7228/api/User/Login", loginData)
   }
   
-  // sendOtp(username: any){
-  //   return this.http.get(`https://localhost:7228/api/User/sendotp/${username}`)
+  // sendOtp(email: any){
+  //   return this.http.get(`https://localhost:7228/api/User/sendotp/${email}`)
   // }
 
   sendOtpWithPasswordCheck(userData: any){
     return this.http.post(`https://localhost:7228/api/User/sendotp-with-password-check`, userData)
   }
 
-  // forgotPassword(username: any, otp: any){
-  //   return this.http.get(`https://localhost:7228/api/User/forgot-password/${username}/${otp}`)
+  // forgotPassword(email: any, otp: any){
+  //   return this.http.get(`https://localhost:7228/api/User/forgot-password/${email}/${otp}`)
   // }
 
   // getSpecialization(){

@@ -41,13 +41,21 @@ export class LoginComponent {
 
 
  loginForm: FormGroup = new FormGroup({
-    username: new FormControl('', [Validators.required, Validators.maxLength(20)]),
-    password: new FormControl('', [Validators.required, Validators.pattern(this.passwordRgx)]),
-    
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(50)
+    ]),
+    password: new FormControl('', [
+      Validators.required,
+      // Validators.pattern(this.passwordRgx),
+      Validators.minLength(8),
+      Validators.maxLength(30)
+    ]),
   });
 
   forgetPasswordForm = new FormGroup({
-    username: new FormControl('', [Validators.required, Validators.maxLength(20)]),
+    email: new FormControl('', [Validators.required, Validators.maxLength(20)]),
     otp: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(6)])
   })
 
@@ -75,9 +83,9 @@ export class LoginComponent {
         if (res.statusCode == 200) {
           this.closeOtpModal();
           localStorage.setItem("token", res.data.token);
-          localStorage.setItem("username", this.loginData.username);
+          localStorage.setItem("email", this.loginData.email);
 
-          this.userService.updateUserDetails(this.loginData.username);
+          this.userService.updateUserDetails(this.loginData.email);
 
           const expiry = new Date(res.data.expiration)
           localStorage.setItem('expiry', expiry.toISOString());
@@ -145,7 +153,7 @@ export class LoginComponent {
 
     
     var data = {
-      username: this.loginForm.get('username')?.value,
+      email: this.loginForm.get('email')?.value,
       password: this.loginForm.get('password')?.value
     }
 
@@ -182,11 +190,11 @@ export class LoginComponent {
   sendOtp() {
     // this.loader.show();
     
-    const username = this.loginForm.get('username')?.value;
+    const email = this.loginForm.get('email')?.value;
     // alert("Otp send take time 6 second. Don't click again")
     this.startResendCountdown();
     
-    this.userService.sendOtpWithPasswordCheck(username).subscribe({
+    this.userService.sendOtpWithPasswordCheck(email).subscribe({
       next : (res: any) => {
         if(res.statusCode == 200){
           // this.loader.hide();
@@ -213,14 +221,14 @@ export class LoginComponent {
 
 sendForgetOtp() {
   // this.loader.show();
-  const username = this.forgetPasswordForm.get('username')?.value;
-  console.log(username);
-  console.log(typeof(username));
+  const email = this.forgetPasswordForm.get('email')?.value;
+  console.log(email);
+  console.log(typeof(email));
   
   // alert("Otp send take time 6 second. Don't click again")
   this.startForgetOtpResendCountdown();
   
-  this.userService.sendOtpWithPasswordCheck(username).subscribe({
+  this.userService.sendOtpWithPasswordCheck(email).subscribe({
     next : (res: any) => {
       if(res.statusCode == 200){
         // this.loader.hide();
@@ -247,10 +255,10 @@ sendForgetOtp() {
 }
 
   // resetPassword() {
-  //   const username = this.forgetPasswordForm.get('username')?.value;
+  //   const email = this.forgetPasswordForm.get('email')?.value;
   //   const otp = this.forgetPasswordForm.get('otp')?.value;
 
-  //   this.userService.forgotPassword(username, otp).subscribe({
+  //   this.userService.forgotPassword(email, otp).subscribe({
   //     next : (res: any) => {
   //       this.forgetPasswordForm.reset();
   //       if(res.statusCode == 200){

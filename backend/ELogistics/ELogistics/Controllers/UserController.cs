@@ -70,6 +70,16 @@ namespace EHR_Application.Controllers
             return Ok(result);
         }
 
+        [HttpGet("get-user-details/{email}")]
+        public async Task<IActionResult> GetUserDetails(string email)
+        {
+            var result = await _mediator.Send(new GetUserByEmailQuery { Email = email });
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
 
         //         [HttpGet("forgot-password/{username}/{otp}")]
         //         public async Task<IActionResult> ForgotPassword(string username, string otp)
@@ -82,16 +92,6 @@ namespace EHR_Application.Controllers
         //             return Ok(result);
         //         }
 
-        //         [HttpGet("get-user-details/{username}")]
-        //         public async Task<IActionResult> GetUserDetails(string username)
-        //         {
-        //             var result = await _mediator.Send(new GetUserByUsernameQuery { Username = username });
-        //             if (!result.IsSuccess)
-        //             {
-        //                 return NotFound(result);
-        //             }
-        //             return Ok(result);
-        //         }
 
 
         //         [HttpGet("get-all-provider-by-specialisationId/{specialisationId}")]

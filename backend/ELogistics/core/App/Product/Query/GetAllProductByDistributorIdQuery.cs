@@ -29,8 +29,10 @@ namespace core.App.Product.Query
             {
                 return AppResponse.Fail<object>(message: "No products found for this distributor", statusCode: HttpStatusCodes.NotFound);
             }
+
+            var allProducts = products.Adapt<List<AllProductResponseDto>>();
             
-            return AppResponse.Success<object>(data: products.Adapt<List<ProductDto>>(), message: "Products retrieved successfully", statusCode: HttpStatusCodes.OK);
+            return AppResponse.Success<object>(data: allProducts, message: "Products retrieved successfully", statusCode: HttpStatusCodes.OK);
         }
     }
 
