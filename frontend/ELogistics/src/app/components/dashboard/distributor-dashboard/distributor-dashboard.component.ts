@@ -43,16 +43,11 @@ export class AdminDashboardComponent {
 
   productForm: FormGroup = new FormGroup({
     productName: new FormControl('', [Validators.required]),
-    productCode: new FormControl('', [Validators.required, Validators.pattern('^[A-Za-z0-9]{5,10}$')]),
-    imageFile: new FormControl<File | null>(null),
-    category: new FormControl("", [Validators.required]),
-
-    brand: new FormControl('', [Validators.required]),
-    sellingPrice: new FormControl('', [Validators.required, Validators.min(1)]),
-    purchasePrice: new FormControl('', [Validators.required, Validators.min(1)]),
-    purchaseDate: new FormControl('', [Validators.required, this.futureDateValidator]),
-    stock: new FormControl('', [Validators.required, Validators.min(1)]),
-    userId: new FormControl(0)
+    productCategory: new FormControl('', [Validators.required]),
+    productMRP: new FormControl('', [Validators.required, Validators.min(0)]),
+    productRate: new FormControl('', [Validators.required, Validators.min(0)]),
+    availableStocks: new FormControl('', [Validators.required, Validators.min(0)]),
+    imageFile: new FormControl<File | null>(null, [Validators.required]),
   });
 
 
@@ -108,8 +103,18 @@ export class AdminDashboardComponent {
   loadProducts() {
     this.productService.getAllProductByDistributorId(this.userDetails.id).subscribe(
       (res: any) => {
-        this.products = res.data;
-        console.log('Products:', res.data);
+        // Map API response to match UI expectations if needed
+        this.products = (res.data || []).map((p: any) => ({
+          id: p.id,
+          distributorId: p.distributorId,
+          productImageUrl: p.productImageUrl,
+          productName: p.productName,
+          productCategory: p.productCategory,
+          productMRP: p.productMRP,
+          productRate: p.productRate,
+          availableStocks: p.availableStocks
+        }));
+        console.log('Products:', this.products);
       },
       (error: any) => {
         console.error('Error fetching products:', error);
@@ -128,12 +133,21 @@ export class AdminDashboardComponent {
   openModal(product: any = null) {
     this.isEditing = !!product;
     this.selectedProduct = product;
-
-    if (this.isEditing) {
-      // Populate form with selected product data
-      this.productForm.patchValue(product);
+    this.productForm.reset();
+    if (this.isEditing && product) {
+      this.productForm.patchValue({
+        productName: product.productName || '',
+        productCategory: product.productCategory || '',
+        productMRP: product.productMRP || '',
+        productRate: product.productRate || '',
+        availableStocks: product.availableStocks || ''
+      });
+      this.productForm.get('imageFile')?.clearValidators();
+      this.productForm.get('imageFile')?.updateValueAndValidity();
+    } else {
+      this.productForm.get('imageFile')?.setValidators([Validators.required]);
+      this.productForm.get('imageFile')?.updateValueAndValidity();
     }
-
     const modal = document.getElementById('productModal');
     if (modal) {
       modal.classList.add('show');
@@ -188,51 +202,49 @@ export class AdminDashboardComponent {
   }
 
   saveProduct() {
-    // if (this.productForm.invalid) {
-    //   this.toaster.error('Please fill all required fields', 'Error');
-    //   return;
-    // } else if (this.productForm.get('sellingPrice')?.value < this.productForm.get('purchasePrice')?.value) {
-    //   this.toaster.error('Selling price cannot be less than purchase price', 'Error');
-    //   return;
-    // }
-
-    // const formData = new FormData();
-
-    // Object.keys(this.productForm.controls).forEach(field => {
-    //   const value = this.productForm.get(field)?.value;
-    //   if (field === "userId") {
-    //     formData.append(field, this.userDetails.id);
-    //   } else {
-    //     formData.append(field, value);
-    //   }
-    // });
-
-    // if (this.isEditing && this.selectedProduct) {
-    //   formData.append('id', this.selectedProduct.id);
-    //   this.productService.updateProduct(formData).subscribe(
-    //     () => {
-    //       this.toaster.success('Product updated successfully', 'Success');
-    //       this.loadProducts();
-    //       this.closeModal();
-    //     },
-    //     (error) => {
-    //       this.toaster.error('Error updating product', 'Error');
-    //       console.error('Error updating product:', error)
-    //     }
-    //   );
-    // } else {
-    //   this.productService.addProduct(formData).subscribe(
-    //     () => {
-    //       this.toaster.success('Product added successfully', 'Success');
-    //       this.loadProducts();
-    //       this.closeModal();
-    //     },
-    //     (error) => {
-    //       this.toaster.error('Error adding product', 'Error');
-    //       console.error('Error adding product:', error)
-    //     }
-    //   );
-    // }
+    if (this.productForm.invalid) {
+      this.toaster.error('Please fill all required fields', 'Error');
+      return;
+    }
+    const formData = new FormData();
+    if (this.isEditing && this.selectedProduct?.id) {
+      formData.append('Id', this.selectedProduct.id);
+    }
+    formData.append('ProductName', this.productForm.get('productName')?.value);
+    formData.append('ProductCategory', this.productForm.get('productCategory')?.value);
+    formData.append('ProductMRP', this.productForm.get('productMRP')?.value);
+    formData.append('ProductRate', this.productForm.get('productRate')?.value);
+    formData.append('AvailableStocks', this.productForm.get('availableStocks')?.value);
+    formData.append('DistributorId', this.userDetails.id);
+    const file = this.productForm.get('imageFile')?.value;
+    if (file) {
+      formData.append('ImageFile', file);
+    }
+    if (this.isEditing) {
+      this.productService.updateProduct(formData).subscribe(
+        () => {
+          this.toaster.success('Product updated successfully', 'Success');
+          this.loadProducts();
+          this.closeModal();
+        },
+        (error) => {
+          this.toaster.error('Error updating product', 'Error');
+          console.error('Error updating product:', error)
+        }
+      );
+    } else {
+      this.productService.addProduct(formData).subscribe(
+        () => {
+          this.toaster.success('Product added successfully', 'Success');
+          this.loadProducts();
+          this.closeModal();
+        },
+        (error) => {
+          this.toaster.error('Error adding product', 'Error');
+          console.error('Error adding product:', error)
+        }
+      );
+    }
   }
 
 
@@ -259,17 +271,17 @@ export class AdminDashboardComponent {
 
   // Delete Product
   deleteProduct(productId: number) {
-    // this.productService.deleteProductById(productId).subscribe(
-    //   () => {
-    //     Swal.fire('Deleted!', 'Your item has been deleted.', 'success');
-    //     this.toaster.success('Product deleted successfully', 'Success');
-    //     this.loadProducts()
-    //   },
-    //   (error) => {
-    //     this.toaster.error('Error deleting product', 'Error');
-    //     console.error('Error deleting product:', error)
-    //   }
-    // );
+    this.productService.deleteProductById(productId).subscribe(
+      () => {
+        Swal.fire('Deleted!', 'Your item has been deleted.', 'success');
+        this.toaster.success('Product deleted successfully', 'Success');
+        this.loadProducts()
+      },
+      (error) => {
+        this.toaster.error('Error deleting product', 'Error');
+        console.error('Error deleting product:', error)
+      }
+    );
   }
 
 

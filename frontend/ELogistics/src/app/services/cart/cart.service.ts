@@ -19,38 +19,42 @@ export class CartService {
 
 
 
-  getCartCount(userId: number) {
-    return this.http.get(`https://localhost:7238/api/Cart/get-cart-count/${userId}`);
+  getCartCount(customerId: number) {
+    return this.http.get(`https://localhost:7228/api/Cart/get-cart-count/${customerId}`);
   } 
 
-  updateCartCount(userId: number) {
-    this.getCartCount(userId).subscribe((count: any) => {
+  updateCartCount(customerId: number) {
+    this.getCartCount(customerId).subscribe((count: any) => {
       this.cartCountSubject.next(count);
     });
   }
 
   addToCart(product: any){
-    return this.http.post("https://localhost:7238/api/Cart/add-to-cart", product);
+    return this.http.post("https://localhost:7228/api/Cart/add-to-cart", product);
   }
 
-  getCartProduct(userId: number){
-    return this.http.get(`https://localhost:7238/api/Cart/get-cart-products/${userId}`);
+  getCartProduct(customerId: number){
+    return this.http.get(`https://localhost:7228/api/Cart/get-cart-products/${customerId}`);
   }
 
   updateCartQuantity(cartQuantityData: any){
-    return this.http.put("https://localhost:7238/api/Cart/update-cart-quantity", cartQuantityData);
+    return this.http.put("https://localhost:7228/api/Cart/update-cart-quantity", cartQuantityData);
   }
 
-  makePayment(paymentData: any){
-    return this.http.post("https://localhost:7238/api/Cart/pay", paymentData);
+  // makePayment(paymentData: any){
+  //   return this.http.post("https://localhost:7238/api/Cart/pay", paymentData);
+  // }
+
+  // makeFakePayment(paymentData: any){
+  //   return this.http.post("https://localhost:7238/api/Cart/fake-pay", paymentData);
+  // }
+
+  removeProductFromCart(productId: any, customerId: any): Observable<any>{
+    return this.http.delete(`https://localhost:7228/api/Cart/remove-product-from-cart/${productId}/${customerId}`)
   }
 
-  makeFakePayment(paymentData: any){
-    return this.http.post("https://localhost:7238/api/Cart/fake-pay", paymentData);
-  }
-
-  removeProductFromCart(productId: any, userId: any): Observable<any>{
-    return this.http.delete(`https://localhost:7238/api/Cart/remove-product-from-cart/${productId}/${userId}`)
+  makePayment(customerId: any){
+    return this.http.get(`https://localhost:7228/api/Cart/checkout/${customerId}`);
   }
   
 }

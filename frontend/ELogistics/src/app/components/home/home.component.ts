@@ -3,11 +3,12 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
 import { UserServiceService } from '../../services/user/user-service.service';
 import { Router } from '@angular/router';
 import { AdminDashboardComponent } from "../dashboard/distributor-dashboard/distributor-dashboard.component";
+import { CustomerDashboardComponent } from '../dashboard/customer-dashboard/customer-dashboard.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, AdminDashboardComponent],
+  imports: [CommonModule, AdminDashboardComponent, CustomerDashboardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

@@ -2,8 +2,8 @@
     <h1 style="text-align: center;" class="mt-4">Distributor Dashboard</h1>
     <app-distributor-dashboard></app-distributor-dashboard>
 }@else if (userDetails !== null) {
-    <h1 style="text-align: center;" class="mt-4">Welcome Customer, {{ userDetails.firstName | titlecase }} {{ userDetails.lastName | titlecase }}</h1>
-    <!-- <app-patient-dashboard></app-patient-dashboard> -->
+    <h1 style="text-align: center;" class="mt-4">Welcome, {{ userDetails.firstName | titlecase }} {{ userDetails.lastName | titlecase }}</h1>
+    <app-customer-dashboard></app-customer-dashboard>
 }
 
 

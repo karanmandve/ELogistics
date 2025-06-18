@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { ProductService } from '../../services/product/product.service';
 import { CommonModule } from '@angular/common';
-import { CartService } from '../../services/cart/cart.service';
 import { ToastrService } from 'ngx-toastr';
+import { ProductService } from '../../../services/product/product.service';
+import { CartService } from '../../../services/cart/cart.service';
+import { UserServiceService } from '../../../services/user/user-service.service';
 declare var bootstrap: any;
 
 @Component({
@@ -15,24 +16,29 @@ declare var bootstrap: any;
 export class CustomerDashboardComponent {
   products: any[] = [];  // Store the products
   selectedProduct: any;  // To store selected product details for the modal
-  userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
+  userDetails: any;
+
 
   // Injecting the ProductService
+  userServices = inject(UserServiceService);
   productService = inject(ProductService);
   cartService = inject(CartService);
   toaster = inject(ToastrService)
 
   ngOnInit() {
+    this.userServices.user$.subscribe((user: any) => {
+      this.userDetails = user;
+      this.getAllProducts();
+    });
     this.loadCartFromLocalStorage();
-    this.getAllProducts();
   }
 
 
   getAllProducts() {
-    this.productService.getAllProduct().subscribe({
-      next: (data: any) => {
-        console.log('Products:', data);
-        this.products = data;  // Store the products data in the array
+    console.log('Fetching products for distributor ID:', this.userDetails.distributorId);
+    this.productService.getAllProductByDistributorId(this.userDetails.distributorId).subscribe({
+      next: (res: any) => {
+        this.products = res.data;  // Store the products data in the array
       },
       error: (error: any) => {
         console.error('Error fetching products:', error);
@@ -53,9 +59,9 @@ export class CustomerDashboardComponent {
     // this.cartService.incrementCartCount();
     this.cart.add(product.id);
     const productData = {
-      userId : this.userDetails.id,
-      productId : product.id,
-      quantity : 1
+      customerId: this.userDetails.id,
+      productId: product.id,
+      quantity: 1
     }
 
     this.cartService.addToCart(productData).subscribe({
@@ -75,21 +81,21 @@ export class CustomerDashboardComponent {
   }
 
   cart = new Set<number>();
-  
+
   isProductInCart(productId: number): boolean {
-    return this.cart.has(productId); 
+    return this.cart.has(productId);
   }
 
-  
+
   updateCartInLocalStorage() {
     localStorage.setItem('cart', JSON.stringify(Array.from(this.cart)));
   }
 
-  
+
   loadCartFromLocalStorage() {
     const storedCart = localStorage.getItem('cart');
     if (storedCart) {
-      this.cart = new Set(JSON.parse(storedCart));  
+      this.cart = new Set(JSON.parse(storedCart));
     }
   }
 

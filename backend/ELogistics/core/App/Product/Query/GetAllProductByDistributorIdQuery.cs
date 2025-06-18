@@ -23,7 +23,7 @@ namespace core.App.Product.Query
         {
             // use entity framework to get all products by distributor id
             var products = await _context.Set<domain.Model.Products.Product>()
-                .Where(x => x.DistributorId == request.DistributorId).ToListAsync(cancellationToken);
+                .Where(x => x.DistributorId == request.DistributorId && x.IsActive == true).ToListAsync(cancellationToken);
 
             if (products == null || !products.Any())
             {

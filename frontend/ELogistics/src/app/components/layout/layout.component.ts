@@ -4,36 +4,41 @@ import { ToastrService } from 'ngx-toastr';
 import { CartService } from '../../services/cart/cart.service';
 import { CommonModule } from '@angular/common';
 import { UserServiceService } from '../../services/user/user-service.service';
-import { SweetAlertToasterService } from '../../services/toaster/sweet-alert-toaster.service';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
   imports: [RouterOutlet, RouterLink, CommonModule],
   templateUrl: './layout.component.html',
-  styleUrl: './layout.component.css',
+  styleUrl: './layout.component.css'
 })
 export class LayoutComponent {
   imageUrl: string = '';
   cartCount: number = 0;
   userDetails: any;
-  username = localStorage.getItem('username');
 
-  toaster: any = inject(SweetAlertToasterService);
+
+  toaster: any = inject(ToastrService);
   router: any = inject(Router);
   cartService: any = inject(CartService);
-  userService = inject(UserServiceService);
+  userServices: any = inject(UserServiceService);
 
+  
   ngOnInit() {
-    this.userService.updateUserDetails(this.username);
+    this.userServices.user$.subscribe((user: any) => {
+      this.userDetails = user;
+    });
 
-    this.userService.user$.subscribe((user: any) => {
-      if (user !== null){
-        this.userDetails = user;
-        this.imageUrl = this.userDetails.profileImageUrl;
-      }
+    const userId = this.userDetails.id;
+    this.cartService.updateCartCount(userId);
+
+    // Subscribe to cart count updates
+    this.cartService.cartCount$.subscribe((count: any) => {
+      this.cartCount = count;
     });
   }
+
+
 
   logout(type: 'manual' | 'auto') {
     localStorage.clear();

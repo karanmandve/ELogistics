@@ -62,16 +62,16 @@ namespace EComApplication.Controllers
             return Ok(result);
         }
 
-        // [HttpGet("get-cart-count/{userId}")]
-        // public async Task<IActionResult> GetCartCount(int userId)
-        // {
-        //     var result = await _mediator.Send(new CartCountQuery { UserId = userId });
-        //     if (!result.IsSuccess)
-        //     {
-        //         return NotFound(result);
-        //     }
-        //     return Ok(result);
-        // }
+        [HttpGet("get-cart-count/{customerId}")]
+        public async Task<IActionResult> GetCartCount(Guid customerId)
+        {
+            var result = await _mediator.Send(new CartCountQuery { CustomerId = customerId });
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
 
         [HttpDelete("remove-product-from-cart/{productId}/{customerId}")]
         public async Task<IActionResult> RemoveProductById(Guid productId, Guid customerId)
