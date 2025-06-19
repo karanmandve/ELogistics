@@ -2,6 +2,7 @@
 using core.Interface;
 using domain.Model.Cart;
 using domain.ModelDtos;
+using Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -31,8 +32,11 @@ namespace core.App.Cart.Query
                 Quantity = cd.Quantity,
                 Category = cd.Product.ProductCategory,
                 ProductMRP = cd.Product.ProductMRP,
+                ProductRate = cd.Product.ProductRate,
+                SGST = GstSlab.GST_9,
+                CGST = GstSlab.GST_9,
                 ProductImageUrl = cd.Product.ProductImageUrl,
-                TotalPrice = cd.Quantity * cd.Product.ProductMRP,
+                TotalPrice = cd.Quantity * cd.Product.ProductRate,
             }).ToListAsync();
 
             if (products == null || !products.Any())

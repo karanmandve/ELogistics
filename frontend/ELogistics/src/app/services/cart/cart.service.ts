@@ -24,8 +24,9 @@ export class CartService {
   } 
 
   updateCartCount(customerId: number) {
-    this.getCartCount(customerId).subscribe((count: any) => {
-      this.cartCountSubject.next(count);
+    this.getCartCount(customerId).subscribe((res: any) => {
+      // Handle API response with {data: number, ...}
+      this.cartCountSubject.next(res.data ?? 0);
     });
   }
 
@@ -53,7 +54,7 @@ export class CartService {
     return this.http.delete(`https://localhost:7228/api/Cart/remove-product-from-cart/${productId}/${customerId}`)
   }
 
-  makePayment(customerId: any){
+  checkout(customerId: any): Observable<any>{
     return this.http.get(`https://localhost:7228/api/Cart/checkout/${customerId}`);
   }
   

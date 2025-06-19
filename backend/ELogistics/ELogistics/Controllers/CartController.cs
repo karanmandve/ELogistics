@@ -87,7 +87,7 @@ namespace EComApplication.Controllers
 
 
 
-        [HttpPost("checkout/{customerId}")]
+        [HttpGet("checkout/{customerId}")]
         public async Task<IActionResult> Checkout(Guid customerId)
         {
             var command = new CheckoutCommand

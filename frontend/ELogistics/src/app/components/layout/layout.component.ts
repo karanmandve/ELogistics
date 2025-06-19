@@ -27,14 +27,14 @@ export class LayoutComponent {
   ngOnInit() {
     this.userServices.user$.subscribe((user: any) => {
       this.userDetails = user;
+      this.cartService.updateCartCount(this.userDetails.id);
     });
-
-    const userId = this.userDetails.id;
-    this.cartService.updateCartCount(userId);
+    
 
     // Subscribe to cart count updates
     this.cartService.cartCount$.subscribe((count: any) => {
       this.cartCount = count;
+      console.log('Cart count updated:', this.cartCount);
     });
   }
 

@@ -1,0 +1,338 @@
+<div class="cart-page">
+  <h1 class="text-center mb-4">Shopping Cart</h1>
+
+  <div *ngIf="cartProducts.length === 0" class="d-flex justify-content-center align-items-center" style="height: 300px;">
+    <p class="text-center">There is no product in your cart</p>
+  </div>
+  
+  <div *ngIf="cartProducts.length > 0" class="container my-5">
+    <div class="row">
+      <!-- Left side: Product Details -->
+      <div class="col-md-8">
+        <div *ngFor="let product of cartProducts" class="cart-item d-flex align-items-center shadow-sm p-3 mb-3 rounded">
+          <div class="cart-item-image" style="width: 100px; height: 100px; overflow: hidden; position: relative;">
+            <img [src]="product.productImageUrl" alt="{{product.productName}}" class="img-fluid h-100 w-100 object-fit-cover">
+          </div>
+          <div class="cart-item-details ms-3 flex-grow-1">
+            <h5 class="product-name">{{ product.productName }}</h5>
+            <p class="product-category text-muted">{{ product.category }}</p>
+            <p class="product-price">Rate: ₹{{ product.productRate }}</p>
+          </div>
+          <div class="quantity-controls ms-3">
+            <button class="btn btn-outline-secondary btn-sm" (click)="decrementQuantity(product)">-</button>
+            <span class="quantity mx-2">{{ product.quantity }}</span>
+            <button class="btn btn-outline-secondary btn-sm" (click)="incrementQuantity(product)">+</button>
+          </div>
+          <button class="btn btn-danger btn-sm ms-3" (click)="removeProductFromCart(product)">Remove</button>
+        </div>
+      </div>
+
+      <!-- Right side: Total Calculation -->
+      <div class="col-md-4">
+        <div class="total-summary shadow-sm p-3 rounded">
+          <h5>Total Calculation</h5>
+          <hr>
+          <div *ngFor="let product of cartProducts" class="d-flex justify-content-between">
+            <span>{{ product.quantity }}x ₹{{ product.productRate }}</span>
+            <span>₹{{ product.totalPrice }}</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between">
+            <span>SGST Total ({{ cartProducts[0]?.sgst || 0 }}%):</span>
+            <span>₹{{ sgstTotal | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>CGST Total ({{ cartProducts[0]?.cgst || 0 }}%):</span>
+            <span>₹{{ cgstTotal | number:'1.2-2' }}</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between">
+            <strong>Total (incl. GST):</strong>
+            <strong>₹{{ totalPrice | number:'1.2-2' }}</strong>
+          </div>
+          <div class="text-center mt-3">
+            <button class="btn btn-primary w-100" (click)="checkout()">Proceed to Checkout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="addressModal" class="modal fade" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addressModalLabel">Add / Edit Address</h5>
+        <button type="button" class="btn-close" (click)="closeModal('addressModal')"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="addressForm">
+          <!-- Address Field -->
+          <div class="mb-3">
+            <label for="registerAddress" class="form-label">Address</label>
+            <textarea
+              type=""
+              min="10"
+              max="150"
+              class="form-control"
+              id="registerAddress"
+              formControlName="address"
+              placeholder="Enter your address"
+              required
+            ></textarea>
+            <div
+              *ngIf="addressForm.get('address')?.touched && addressForm.get('address')?.invalid"
+              class="text-danger"
+            >
+              <!-- Required error -->
+              <div *ngIf="addressForm.get('address')?.errors?.['required']">
+                Address is required.
+              </div>
+              <!-- Min Length error -->
+              <div *ngIf="addressForm.get('address')?.errors?.['minlength']">
+                Address must be at least 10 characters long.
+              </div>
+              <!-- Max Length error -->
+              <div *ngIf="addressForm.get('address')?.errors?.['maxlength']">
+                Address cannot exceed 150 characters.
+              </div>
+              <!-- Pattern error -->
+              <div *ngIf="addressForm.get('address')?.errors?.['pattern']">
+                Address can only contain letters, numbers, spaces, commas, periods, and hyphens.
+              </div>
+            </div>
+          </div>
+          
+
+          <!-- Zipcode Field -->
+          <div class="mb-3">
+            <label for="registerZipCode" class="form-label">ZIP Code</label>
+            <input
+              type="text"
+              minlength="6"
+              maxlength="6"
+              class="form-control"
+              id="registerZipCode"
+              formControlName="zipcode"
+              placeholder="Enter your ZIP code"
+              (keypress)="onKeyPress($event)"
+              required
+            />
+            <div
+              *ngIf="addressForm.get('zipcode')?.touched && addressForm.get('zipcode')?.invalid"
+              class="text-danger"
+            >
+              
+              <div *ngIf="addressForm.get('zipcode')?.errors?.['required']">
+                ZIP code is required.
+              </div>
+              
+              <div *ngIf="addressForm.get('zipcode')?.errors?.['pattern']">
+                Please enter a valid 6-digit ZIP code.
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="country" class="form-label">Country</label>
+            <select (change)="getState(addressForm.value.country)" formControlName="country" name="country" class="form-control" id="country" required>
+                <option value="" disabled selected>Select a country</option>
+                <option *ngFor="let country of allCountry" [value]="country.countryId">{{ country.name }}</option>
+                
+            </select>
+            <div
+            *ngIf="addressForm.get('country')?.invalid && addressForm.get('country')?.touched"
+            class="text-danger small mt-1"
+          >
+            Country is required.
+          </div>
+        </div>
+
+
+        <div class="mb-3">
+          <label for="state" class="form-label">State</label>
+          <select formControlName="state" name="state" class="form-control" id="state" required>
+              <option selected disabled>Select a state</option>
+              <option *ngFor="let state of allState" [value]="state.stateId">{{ state.name }}</option>
+              
+          </select>
+          <div
+          *ngIf="addressForm.get('state')?.invalid && addressForm.get('state')?.touched"
+          class="text-danger small mt-1"
+        >
+          State is required.
+        </div>
+       </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal('addressModal')">Close</button>
+        <button type="button" class="btn btn-primary" (click)="saveAddress()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="fakePaymentModal" class="modal fade" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentModalLabel">Payment Details</h5>
+        <button type="button" class="btn-close" (click)="closeModal('fakePaymentModal')"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="paymentForm">
+          <!-- Card Number -->
+          <div class="mb-3">
+            <label for="cardNumber" class="form-label">Card Number</label>
+            <input
+            maxlength="16"
+              type="text"
+              class="form-control"
+              id="cardNumber"
+              formControlName="cardNumber"
+              (keypress)="onKeyPress($event)"
+              required
+            />
+            <div *ngIf="paymentForm.get('cardNumber')?.touched && paymentForm.get('cardNumber')?.invalid" class="text-danger">
+              <div *ngIf="paymentForm.get('cardNumber')?.hasError('required')">Card Number is required.</div>
+              <div *ngIf="paymentForm.get('cardNumber')?.hasError('pattern')">Card Number must be 16 digits.</div>
+            </div>
+          </div>
+
+          <!-- Expiry Date -->
+          <div class="mb-3">
+            <label for="expiryDate" class="form-label">Expiration Date</label>
+            <div class="d-flex">
+              <select class="form-control" id="expiryMonth" formControlName="expiryMonth">
+                <option value="" disabled selected>MM</option>
+                <option *ngFor="let month of months" [value]="month.value">{{ month.label }}</option>
+              </select>
+
+
+              <span class="mx-2">/</span>
+              
+              
+              <select class="form-control" id="expiryYear" formControlName="expiryYear">
+                <option value="" disabled selected>YYYY</option>
+                <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+              </select>
+            
+            </div>
+            <div *ngIf="paymentForm.get('expiryMonth')?.touched && paymentForm.get('expiryMonth')?.invalid" class="text-danger">
+              <div *ngIf="paymentForm.get('expiryMonth')?.hasError('required')">Month is required.</div>
+            </div>
+            <div *ngIf="paymentForm.get('expiryYear')?.touched && paymentForm.get('expiryYear')?.invalid" class="text-danger">
+              <div *ngIf="paymentForm.get('expiryYear')?.hasError('required')">Year is required.</div>
+            </div>
+          </div>
+
+
+
+
+          <!-- <div class="mb-3">
+            <label for="expiryDate" class="form-label">Expiry Date</label>
+            <input
+              type="text"
+              class="form-control"
+              id="expiryDate"
+              formControlName="expiryDate"
+              placeholder="MM/YYYY"
+              required
+            />
+            <div *ngIf="paymentForm.get('expiryDate')?.touched && paymentForm.get('expiryDate')?.invalid" class="text-danger">
+              <div *ngIf="paymentForm.get('expiryDate')?.hasError('required')">Expiry Date is required.</div>
+              <div *ngIf="paymentForm.get('expiryDate')?.hasError('pattern')">Expiry Date must be in MM/YY format.</div>
+            </div>
+          </div> -->
+
+
+          
+          <!-- CVV -->
+          <div class="mb-3">
+            <label for="cvv" class="form-label">CVV</label>
+            <input
+            maxlength="3"
+              type="text"
+              class="form-control"
+              id="cvv"
+              formControlName="cvv"
+              (keypress)="onKeyPress($event)"
+              required
+            />
+            <div *ngIf="paymentForm.get('cvv')?.touched && paymentForm.get('cvv')?.invalid" class="text-danger">
+              <div *ngIf="paymentForm.get('cvv')?.hasError('required')">CVV is required.</div>
+              <div *ngIf="paymentForm.get('cvv')?.hasError('pattern')">CVV must be 3 digits.</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal('fakePaymentModal')">Close</button>
+        <button type="button" class="btn btn-primary" [disabled]="paymentForm.invalid" (click)="makeFakePayment()">Make Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="choosePaymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="paymentModalLabel">Choose Payment Option</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal('choosePaymentModal')"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Please select a payment method:</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button type="button" class="btn btn-danger btn-lg" id="fakePayBtn" (click)="openFakePaymentPopup()">Fake Pay</button>
+          <button type="button" class="btn btn-success btn-lg" id="payBtn" (click)="makePayment()">Pay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="successModal" class="modal fade" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="successModalLabel">Payment Successful</h5>
+      </div>
+      <div class="modal-body">
+        <p>Your payment has been processed successfully. Thank you for your purchase!</p>
+        <button *ngIf="invoiceUrl" class="btn btn-success mt-2" (click)="downloadInvoice()">Download Invoice</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="closeModal('successModal')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="waitingModal" tabindex="-1" aria-labelledby="waitingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="waitingModalLabel">Please Wait</h5>
+      </div>
+      <div class="modal-body text-center">
+        <h4>Time: <span id="counterValue">{{ counter }} seconds</span></h4>
+        <p>We are generating recipt and sending to your mail.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
