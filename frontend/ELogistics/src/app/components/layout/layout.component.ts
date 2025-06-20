@@ -16,15 +16,17 @@ export class LayoutComponent {
   imageUrl: string = '';
   cartCount: number = 0;
   userDetails: any;
-
-
+  
+  
   toaster: any = inject(ToastrService);
   router: any = inject(Router);
   cartService: any = inject(CartService);
   userServices: any = inject(UserServiceService);
-
+  
   
   ngOnInit() {
+    const email = localStorage.getItem('email') || '';
+    this.userServices.updateUserDetails(email);
     this.userServices.user$.subscribe((user: any) => {
       this.userDetails = user;
       this.cartService.updateCartCount(this.userDetails.id);
